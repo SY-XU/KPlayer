@@ -1,0 +1,329 @@
+package com.xk.player.ui;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.LineAttributes;
+import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.graphics.Pattern;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+
+import com.xk.player.core.BasicController;
+import com.xk.player.core.BasicPlayerEvent;
+import com.xk.player.core.BasicPlayerListener;
+import com.xk.player.lrc.XRCLine;
+import com.xk.player.lrc.XRCNode;
+import com.xk.player.tools.Config;
+import com.xk.player.tools.FileUtils;
+import com.xk.player.tools.JSONUtil;
+import com.xk.player.tools.KrcText;
+import com.xk.player.tools.LrcParser;
+import com.xk.player.tools.SWTResourceManager;
+
+
+public class NormalWord extends Canvas implements PaintListener,BasicPlayerListener{
+
+	private List<XRCLine>lines;
+	private int cur=0;
+	private int left=50;
+	private Image lrcImg;
+	private ReentrantLock lock;
+	private Condition cond;
+	private Condition drawCond;
+	private boolean paused=true;
+	private long nowTime=0;
+	private PlayUI ui;
+	private boolean drawing=false;
+	private String songName ="";
+	private Config config;
+	
+	
+	public NormalWord(Composite parent,PlayUI ui) {
+		super(parent, SWT.DOUBLE_BUFFERED);
+		config=Config.getInstance();
+		this.ui=ui;
+		this.addPaintListener(this);
+		lock=new ReentrantLock();
+		cond=lock.newCondition();
+		drawCond=lock.newCondition();
+		backGround();
+	}
+	
+	private void backGround(){
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while(true){
+					if(paused){
+						lock.lock();
+						try {
+							cond.await();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}finally{
+							lock.unlock();
+						}
+					}
+					Display.getDefault().asyncExec(new Runnable() {
+						
+						@Override
+						public void run() {
+							if(!NormalWord.this.isDisposed()&&NormalWord.this.isVisible()){
+								NormalWord.this.redraw();
+							}
+							
+						}
+					});
+					try {
+						Thread.sleep(70);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				
+			}
+		}).start();
+		
+	}
+	
+	private void pause(boolean paused){
+		this.paused=paused;
+		if(!paused){
+			lock.lock();
+			try {
+				cond.signalAll();
+			} finally{
+				lock.unlock();
+			}
+			
+		}
+	}
+	
+	@Override
+	public void paintControl(PaintEvent event) {
+		if(nowTime==0){
+			return;
+		}
+		GC g=event.gc;
+		if(null!=lrcImg){
+			g.drawImage(lrcImg, 0, 0);
+		}
+		boolean adv=g.getAdvanced();
+		g.setAdvanced(true);
+		g.setAntialias(SWT.ON);
+		if(null!=lines&&lines.size()>0&&!paused){
+			drawing=true;
+			drawXRC(g);
+			drawing=false;
+			lock.lock();
+			try {
+				drawCond.signalAll();
+			} finally {
+				lock.unlock();
+			}
+		}
+		if(null==lines){
+			drawSongName(g);
+		}
+		g.setAdvanced(adv);
+		g.dispose();
+	}
+
+	private void drawSongName(GC g){
+		Font ft=SWTResourceManager.getFont( "楷体", 22,SWT.NORMAL);
+		Point songWidth=g.stringExtent(songName);
+        g.setFont(ft);
+        g.setForeground(SWTResourceManager.getColor(config.br, config.bg, config.bb));
+        g.setBackground(SWTResourceManager.getColor(config.br, config.bg, config.bb));
+        Path path = new Path(null);
+        path.addString(songName,left, getSize().y/2-songWidth.y/2, ft);
+        g.drawPath(path);
+        g.fillPath(path);
+        path.dispose();
+	}
+	
+	private void drawXRC(GC g){
+		long timeOffset=ui.getLrcOffset();
+		long time=nowTime+timeOffset;
+		XRCLine currentLine=lines.get(cur);
+		if(currentLine.start!=null&&currentLine.length!=null&&(time>currentLine.start+currentLine.length)){
+			cur++;
+			if(cur<lines.size()){
+				currentLine=lines.get(cur);
+			}else{
+				cur--;
+			}
+		}
+		float[] dashList = new float[]{255,255};
+		Font ft=SWTResourceManager.getFont( "楷体", 22,SWT.NORMAL);
+        g.setFont(ft);
+        g.setForeground(SWTResourceManager.getColor(config.br, config.bg, config.bb));
+        g.setBackground(SWTResourceManager.getColor(config.br, config.bg, config.bb));
+        float baseY=220;
+        
+        for(int i=1;i<=6;i++){//绘制前后语句
+        	g.setAlpha(255-i*30);
+        	Path path = new Path(null);
+        	int temp=cur-i;
+        	String str=temp<0?"":lines.get(temp).getWord();
+        	path.addString(str,left, baseY-(i*30), ft);
+        	temp=cur+i;
+        	str=null;
+        	str=temp>=lines.size()?"":lines.get(temp).getWord();
+        	path.addString(str,left, baseY+(i*30), ft);
+        	g.fillPath(path);
+            path.dispose();
+        }
+        g.setAlpha(255);
+        int now=0;
+        for(int i=currentLine.nodes.size()-1;i>=0;i--){//获取当前字
+        	XRCNode node=currentLine.nodes.get(i);
+        	if(time>currentLine.start+node.start){
+        		now=i;
+        		break;
+        	}
+        }
+        float off=0;
+        for(int i=0;i<now;i++){//计算位移
+        	XRCNode node=currentLine.nodes.get(i);
+        	off+=g.stringExtent(node.word).x+1;
+        }
+        if(currentLine.nodes.size()>0&&currentLine.start!=null&&currentLine.length!=null){
+        	 XRCNode node=currentLine.nodes.get(now);
+             float percent=(float)(time-(currentLine.start+node.start))/node.length;
+             if(percent>1){
+            	 percent=1;
+             }
+             off+=g.stringExtent(node.word).x*percent;
+             int baseLeft=left;
+             if(off>370){
+            	 baseLeft=(int) (left-(off-370));
+            	 off=370f;
+             }
+     		 LineAttributes attributes =new LineAttributes(1, SWT.CAP_FLAT, SWT.JOIN_MITER, SWT.LINE_SOLID, dashList, 1, 3000);
+     		 g.setLineAttributes(attributes);
+             Pattern pattern =new Pattern(null, left+off, 0, 10000, 0, SWTResourceManager.getColor(config.br, config.bg, config.bb), 255, SWTResourceManager.getColor(config.cr, config.cg, config.cb), 255);
+             g.setForegroundPattern(pattern);
+             g.setBackgroundPattern(pattern);
+             Path pt = new Path(null); 
+             String wd=currentLine.getWord();
+             pt.addString(wd,baseLeft,baseY, ft);
+             g.fillPath(pt);
+             g.drawPath(pt);
+             pt.dispose();
+             pattern.dispose();
+        }
+	}
+	
+
+
+	public Image getLrcImg() {
+		return lrcImg;
+	}
+
+
+	public void setLrcImg(Image lrcImg) {
+		if(null!=this.lrcImg){
+			this.lrcImg.dispose();
+		}
+		this.lrcImg = lrcImg;
+	}
+
+
+	public synchronized void setLines(List<XRCLine> lines) {
+		if(drawing){
+			lock.lock();
+			try {
+				drawCond.await();
+			} catch (InterruptedException e) {
+			} finally {
+				lock.unlock();
+			}
+		}
+		this.lines = lines;
+		cur=0;
+	}
+
+	@Override
+	public void opened(Object stream, Map properties) {
+		nowTime=0;
+		setLines(null);
+		cur=0;
+		lrcImg=null;
+		pause(false);
+		Long allLength="Monkey's Audio (ape)".equals(properties.get("audio.type"))?(long) properties.get("duration")*1000L:(long) properties.get("duration");
+		if(stream instanceof File){
+			File file=(File) stream;
+			songName =file.getName().substring(0, file.getName().lastIndexOf("."));
+			String filename=file.getAbsolutePath();
+			File songWord = new File(filename.substring(0, filename
+					.lastIndexOf("."))
+					+ ".lrc");
+			File xrcWord = new File(filename.substring(0, filename
+					.lastIndexOf("."))
+					+ ".zlrc");
+			File krcWord = new File(filename.substring(0, filename
+					.lastIndexOf("."))
+					+ ".krc");
+			if(xrcWord.exists()){
+				String data=FileUtils.readString(xrcWord.getAbsolutePath());
+				List<XRCLine>lines=JSONUtil.toBean(data, JSONUtil.getCollectionType(List.class, XRCLine.class));
+				setLines(lines);
+			}else if (krcWord.exists()) {
+				List<XRCLine>lines=KrcText.fromKRC(krcWord.getAbsolutePath());
+				setLines(lines);
+			}else if (songWord.exists()) {
+				try {
+					LrcParser parser = new LrcParser(allLength);
+					List<XRCLine> lines = parser.parser(songWord.getAbsolutePath());
+					setLines(lines);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void progress(int bytesread, long microseconds, byte[] pcmdata, Map properties) {
+		long now=ui.jumpedMillan+microseconds/1000;
+		if(now-nowTime>70){
+			nowTime=now;
+		}
+		
+	}
+
+	@Override
+	public void stateUpdated(BasicPlayerEvent event) {
+		if(event.getCode()==BasicPlayerEvent.PAUSED){
+			pause(true);
+		}else if(event.getCode()==BasicPlayerEvent.RESUMED){
+			pause(false);
+		}
+	}
+
+	@Override
+	public void setController(BasicController controller) {
+		
+	}
+	
+}
