@@ -5,7 +5,7 @@ java音乐播放器
 支持MP3，ape格式，还有一些格式可以播放，但是不好控制，所以没加。
 
 #技术
-- [x] 界面库SWT
+- [x] 界面库SWT，悬浮歌词SWING，做了版SWT悬浮歌词，效率太差就放弃了
 - [x] json解析使用jackson
 - [x] http请求使用httpclient
 - [x] 音频解析使用 jl jogg jflac等库
