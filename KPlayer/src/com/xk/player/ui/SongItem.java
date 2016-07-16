@@ -33,7 +33,8 @@ public class SongItem extends ListItem {
 	private Map<String,String> property;
 	private int height=30;
 	private int selectedHeight=50;
-	private Image head=SWTResourceManager.getImage(SongItem.class, "/images/head.png");
+	private Image headDefault=SWTResourceManager.getImage(SongItem.class, "/images/head.png");
+	private Image head;
 	
 	public SongItem(Map<String,String> property){
 		this.property=property;
@@ -48,6 +49,16 @@ public class SongItem extends ListItem {
 		return selected?selectedHeight:height;
 	}
 
+	
+	@Override
+	public void unSelect() {
+		if(null!=head){
+			head.dispose();
+			head=null;
+		}
+		super.unSelect();
+	}
+
 	@Override
 	public void draw(GC gc, int start,int width,int index) {
 		String name=FileUtils.getLimitString(property.get("name"), 18);
@@ -58,7 +69,7 @@ public class SongItem extends ListItem {
 			gc.setAlpha(55);
 			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
 			gc.setAlpha(alf);
-			gc.drawImage(head, 15, start);
+			gc.drawImage((null==head||head.isDisposed())?headDefault:head, 15, start);
 			Path path=new Path(null);
 			path.addString(name, 15+58f, start+8, font);
 			String all=property.get("all");
@@ -172,6 +183,14 @@ public class SongItem extends ListItem {
 
 	public Map<String,String> getProperty() {
 		return Collections.unmodifiableMap(property);
+	}
+
+	public Image getHead() {
+		return head;
+	}
+
+	public void setHead(Image head) {
+		this.head = head;
 	}
 
 }

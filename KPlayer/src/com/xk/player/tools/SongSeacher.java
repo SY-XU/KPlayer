@@ -67,6 +67,27 @@ public class SongSeacher {
 		return builder.toString();
 	}
 	
+	public static String getArtistFromKuwo(String name){
+		String searchUrl=null;
+		try {
+			searchUrl="http://sou.kuwo.cn/ws/NSearch?type=artist&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
+		} catch (UnsupportedEncodingException e) {
+			return null;
+		}
+		String html=Loginer.getInstance("search").getHtml(searchUrl);
+		if(!StringUtil.isBlank(html)){
+			Document doc=Jsoup.parse(html);
+			Elements texts=doc.getElementsByAttribute("lazy_src");
+			for(Element ele:texts){
+				String alt=ele.attr("alt");
+				if(null!=alt&&alt.contains(name)){
+					return ele.attr("lazy_src");
+				}
+			}
+		}
+		return null;
+	}
+	
 	public static List<SearchInfo> getLrcFromKuwo(String name){
 		List<SearchInfo> lrcs=new ArrayList<SearchInfo>();
 		String searchUrl=null;

@@ -1,7 +1,10 @@
 package com.xk.player.ui;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +12,10 @@ import java.util.Random;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.cmc.music.common.ID3ReadException;
+import org.cmc.music.metadata.MusicMetadata;
+import org.cmc.music.metadata.MusicMetadataSet;
+import org.cmc.music.myid3.MyID3;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -18,6 +25,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -32,7 +40,11 @@ import com.xk.player.core.BasicPlayerException;
 import com.xk.player.core.BasicPlayerListener;
 import com.xk.player.lrc.LyricFrame;
 import com.xk.player.tools.Config;
+import com.xk.player.tools.FileUtils;
+import com.xk.player.tools.ID3Tag;
+import com.xk.player.tools.Loginer;
 import com.xk.player.tools.SWTTools;
+import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 import com.xk.player.uilib.ColorLabel;
@@ -622,6 +634,38 @@ public class PlayUI implements BasicPlayerListener{
 		}finally{
 			lock.unlock();
 		}
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				String name=item.getProperty().get("artist");
+				System.out.println("name:"+name);
+				if(null!=name&&!name.isEmpty()){
+					String path=SongSeacher.getArtistFromKuwo(name);
+					System.out.println("path:"+path);
+					if(null!=path&&!path.isEmpty()){
+						SongLocation loc=Loginer.getInstance("player").getInputStream(path);
+						if(null!=loc){
+							ImageData[] img=new ImageLoader().load(loc.input);
+							if(null!=img&&img.length>0){
+								Image head=new Image(null,img[0].scaledTo(50, 50));
+								item.setHead(head);
+								Display.getDefault().asyncExec(new Runnable() {
+									public void run() {
+										item.getParent().flush();
+									}
+								});
+							}
+						}
+						
+					}
+					
+					
+				}
+				
+				
+			}
+		}).start();
 		
 	}
 	
@@ -647,8 +691,37 @@ public class PlayUI implements BasicPlayerListener{
 		}
 		File file=new File(path);
 		if(file.exists()&&file.isFile()){
-			String name=file.getName();
 			Map<String,String>pro=new HashMap<>();
+			try {
+				MusicMetadataSet data = new MyID3().read(file);
+				MusicMetadata metadata = (MusicMetadata) data.getSimplified();
+				
+				String artist=metadata.getArtist();
+				String album=metadata.getAlbum();
+				String title=metadata.getSongTitle();
+				if(null!=artist){
+					artist=new String(artist.getBytes(FileUtils.getEncoding(artist)),"GB2312");
+					if(artist.indexOf("&")>=0){
+						artist=artist.split("&")[0];
+					}
+				}else{
+					artist=file.getName().split("-")[0].trim();
+				}
+				if(null!=album){
+					album=new String(album.getBytes(FileUtils.getEncoding(album)),"GB2312");
+				}
+				if(null!=title){
+					title=new String(title.getBytes(FileUtils.getEncoding(title)),"GB2312");
+				}
+				
+				pro.put("artist", artist);
+				pro.put("album", album);
+				pro.put("title", title);
+			} catch (Exception e) {
+				String artist=file.getName().split("-")[0].trim();
+				pro.put("artist", artist);
+			}
+			String name=file.getName();
 			pro.put("name", name.substring(0, name.lastIndexOf(".")));
 			pro.put("path", path);
 			SongItem item=new SongItem(pro);

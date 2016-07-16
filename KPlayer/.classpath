@@ -23,5 +23,6 @@
 	<classpathentry kind="lib" path="libs/httpcore-4.3.2.jar"/>
 	<classpathentry kind="lib" path="libs/httpmime-4.3.3.jar"/>
 	<classpathentry kind="lib" path="libs/commons-logging-1.1.3.jar"/>
+	<classpathentry kind="lib" path="libs/regexp-1.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
