@@ -398,7 +398,7 @@ public class PlayUI implements BasicPlayerListener{
 				if(null!=path&&!path.isEmpty()){
 					addFile(path);
 				}
-				
+				list.flush();
 			}
 		});
 		
@@ -426,6 +426,7 @@ public class PlayUI implements BasicPlayerListener{
 						for(String path:mp3s){
 							addFile(dir+File.separator+path);
 						}
+						list.flush();
 					}
 					
 				}
@@ -551,10 +552,20 @@ public class PlayUI implements BasicPlayerListener{
 					for(String path:Config.getInstance().songList){
 						addFile(path);
 					}
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							list.flush();
+						}
+					});
 				}else{
 					for(String path:Config.getInstance().favoriteList){
 						addFile(path);
 					}
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							list.flush();
+						}
+					});
 				}
 				
 			}
@@ -612,6 +623,7 @@ public class PlayUI implements BasicPlayerListener{
 					item.setHead(true);
 				}
 				searchResult.addItem(item);
+				searchResult.flush();
 			}
 		}
 	}
@@ -691,35 +703,47 @@ public class PlayUI implements BasicPlayerListener{
 		}
 		File file=new File(path);
 		if(file.exists()&&file.isFile()){
-			Map<String,String>pro=new HashMap<>();
+			Config config=Config.getInstance();
+			Map<String,String>pro=config.maps.get(path);
 			try {
-				MusicMetadataSet data = new MyID3().read(file);
-				MusicMetadata metadata = (MusicMetadata) data.getSimplified();
-				
-				String artist=metadata.getArtist();
-				String album=metadata.getAlbum();
-				String title=metadata.getSongTitle();
-				if(null!=artist){
-					artist=new String(artist.getBytes(FileUtils.getEncoding(artist)),"GB2312");
-					if(artist.indexOf("&")>=0){
-						artist=artist.split("&")[0];
+				if(null==pro){
+					System.out.println("no properties found:"+path);
+					pro=new HashMap<String, String>();
+					MusicMetadataSet data = new MyID3().read(file);
+					MusicMetadata metadata = (MusicMetadata) data.getSimplified();
+					
+					String artist=metadata.getArtist();
+					String album=metadata.getAlbum();
+					String title=metadata.getSongTitle();
+					if(null!=artist){
+						artist=new String(artist.getBytes(FileUtils.getEncoding(artist)),"GB2312");
+						if(artist.indexOf("&")>=0){
+							artist=artist.split("&")[0];
+						}
+					}else{
+						artist=file.getName().split("-")[0].trim();
 					}
-				}else{
-					artist=file.getName().split("-")[0].trim();
-				}
-				if(null!=album){
-					album=new String(album.getBytes(FileUtils.getEncoding(album)),"GB2312");
-				}
-				if(null!=title){
-					title=new String(title.getBytes(FileUtils.getEncoding(title)),"GB2312");
+					if(null!=album){
+						album=new String(album.getBytes(FileUtils.getEncoding(album)),"GB2312");
+					}
+					if(null!=title){
+						title=new String(title.getBytes(FileUtils.getEncoding(title)),"GB2312");
+					}
+					
+					pro.put("artist", artist);
+					pro.put("album", album);
+					pro.put("title", title);
+					config.maps.put(path, pro);
 				}
 				
-				pro.put("artist", artist);
-				pro.put("album", album);
-				pro.put("title", title);
 			} catch (Exception e) {
+				if(null==pro){
+					System.out.println("no properties found:"+path);
+					pro=new HashMap<String, String>();
+				}
 				String artist=file.getName().split("-")[0].trim();
 				pro.put("artist", artist);
+				config.maps.put(path, pro);
 			}
 			String name=file.getName();
 			pro.put("name", name.substring(0, name.lastIndexOf(".")));
@@ -775,7 +799,7 @@ public class PlayUI implements BasicPlayerListener{
 		ListItem selected=list.getSelection();
 		if(null==selected&&null!=focus){
 			list.select(focus, true);
-			selected=list.getSelection();
+			selected=list.getSelection(); 
 		}
 		String path="";
 		if(null!=selected){

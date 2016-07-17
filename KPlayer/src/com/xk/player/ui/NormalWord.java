@@ -40,7 +40,7 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 
 	private List<XRCLine>lines;
 	private int cur=0;
-	private int left=50;
+	private int left=0;
 	private Image lrcImg;
 	private ReentrantLock lock;
 	private Condition cond;
@@ -215,9 +215,9 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
              }
              off+=g.stringExtent(node.word).x*percent;
              int baseLeft=left;
-             if(off>370){
-            	 baseLeft=(int) (left-(off-370));
-            	 off=370f;
+             if(off>420){
+            	 baseLeft=(int) (left-(off-420));
+            	 off=420f;
              }
      		 LineAttributes attributes =new LineAttributes(1, SWT.CAP_FLAT, SWT.JOIN_MITER, SWT.LINE_SOLID, dashList, 1, 3000);
      		 g.setLineAttributes(attributes);

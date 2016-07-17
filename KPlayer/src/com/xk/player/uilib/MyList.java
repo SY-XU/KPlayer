@@ -406,11 +406,6 @@ public class MyList extends Composite {
 			items.add(item);
 			item.setParent(this);
 			countHeight();
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					back.redraw();
-				}
-			});
 		}
 	}
 	

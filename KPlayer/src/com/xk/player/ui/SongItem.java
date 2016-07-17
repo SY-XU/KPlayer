@@ -1,5 +1,6 @@
 package com.xk.player.ui;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
 
 import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
@@ -161,6 +163,27 @@ public class SongItem extends ListItem {
 						bbox.add(src);
 						bbox.open(0, 0);
 					}
+				}
+			});
+			
+			MenuItem mOpen = new MenuItem(m, SWT.NONE);
+			mOpen.setText("打开文件所在文件夹");
+			mOpen.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e1) {
+					try {
+						Runtime.getRuntime().exec(
+								"rundll32 SHELL32.DLL,ShellExec_RunDLL "
+										+ "Explorer.exe /select,"
+										+ getProperty().get("path")
+												);
+					} catch (IOException e) {
+						MessageBox mb = new MessageBox(getParent().getShell(), SWT.NONE);
+						mb.setText("错误");
+						mb.setMessage("文件不存在，建议删除歌曲。");
+						mb.open();
+					}
+					
 				}
 			});
 			

@@ -3,9 +3,13 @@ package com.xk.player.tools;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Config {
 
@@ -37,6 +41,9 @@ public class Config {
 	//播放列表
 	public List<String> songList=new ArrayList<>();
 	public List<String> favoriteList=new ArrayList<>();
+
+	@JsonIgnore
+	public Map<String,Map<String,String>> maps=new HashMap<String,Map<String,String>>();
 	
 	private static Config instance;
 	public static Config getInstance(){
