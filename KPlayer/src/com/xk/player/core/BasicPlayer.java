@@ -48,7 +48,6 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javazoom.spi.PropertiesContainer;
-import sun.util.logging.resources.logging_zh_CN;
 
 import org.tritonus.share.sampled.TAudioFormat;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
@@ -61,7 +60,6 @@ import static com.xk.player.core.BasicPlayerEvent.*;
  * BasicPlayer is a threaded simple player class based on JavaSound API.
  * It has been successfully tested under J2SE 1.3.x, 1.4.x and 1.5.x.
  */
-@SuppressWarnings("unchecked")
 public class BasicPlayer implements BasicController, Runnable {
 
     public static int EXTERNAL_BUFFER_SIZE = 4000 * 4;
@@ -91,7 +89,7 @@ public class BasicPlayer implements BasicController, Runnable {
 //    public static final int OPENED = 3;
 //    public static final int SEEKING = 4;
     private int m_status = UNKNOWN;
-    private Map empty_map = new HashMap();
+    private Map<String,Object> empty_map = new HashMap<String,Object>();
     private BasicPlayerEventLauncher laucher;//事件分派器
     
     public static void main(String[] args){
@@ -110,13 +108,13 @@ public class BasicPlayer implements BasicController, Runnable {
 			}
 			
 			@Override
-			public void progress(int bytesread, long microseconds, byte[] pcmdata, Map properties) {
+			public void progress(int bytesread, long microseconds, byte[] pcmdata, Map<String,Object> properties) {
 				System.out.println(microseconds);
 				
 			}
 			
 			@Override
-			public void opened(Object stream, Map properties) {
+			public void opened(Object stream, Map<String,Object> properties) {
 				System.out.println(properties.get("duration"));
 				
 			}
@@ -177,7 +175,7 @@ public class BasicPlayer implements BasicController, Runnable {
      * Return registered listeners.
      * @return
      */
-    public Collection getListeners() {
+    public Collection<BasicPlayerListener> getListeners() {
         return laucher.getBasicPlayerListeners();
     }
 
@@ -290,14 +288,14 @@ public class BasicPlayer implements BasicController, Runnable {
             }
             createLine();
             // Notify listeners with AudioFileFormat properties.
-            Map properties = null;
+            Map<String,Object> properties = null;
             if (m_audioFileFormat instanceof TAudioFileFormat) {
                 // Tritonus SPI compliant audio file format.
                 properties = ((TAudioFileFormat) m_audioFileFormat).properties();
                 // Clone the Map because it is not mutable.
                 properties = deepCopy(properties);
             } else {
-                properties = new HashMap();
+                properties = new HashMap<String,Object>();
             }
             // Add JavaSound properties.
             if (m_audioFileFormat.getByteLength() > 0) {
@@ -328,7 +326,7 @@ public class BasicPlayer implements BasicController, Runnable {
             }
             if (audioFormat instanceof TAudioFormat) {
                 // Tritonus SPI compliant audio format.
-                Map addproperties = ((TAudioFormat) audioFormat).properties();
+                Map<String,Object> addproperties = ((TAudioFormat) audioFormat).properties();
                 properties.putAll(addproperties);
             }
             // Add SourceDataLine
@@ -602,8 +600,6 @@ public class BasicPlayer implements BasicController, Runnable {
         log.info("Thread Running");
         int nBytesRead = 1;
         byte[] abData = new byte[EXTERNAL_BUFFER_SIZE];
-        int readIndex = 0;//所有读进缓冲区的数量
-        int writeIndex = 0;//所有写出数量
         // Lock stream while playing.
         synchronized (m_audioInputStream) {
             boolean buffering = false;
@@ -624,7 +620,7 @@ public class BasicPlayer implements BasicController, Runnable {
 //                                buffering=false;
 //                            }
                             if (buffering == false) {
-                                int nBytesWritten = m_line.write(abData, 0, nBytesRead);
+                                m_line.write(abData, 0, nBytesRead);
                                 // Compute position in bytes in encoded stream.
                                 int nEncodedBytes = getEncodedStreamPosition();
                                 // Notify listeners
@@ -633,7 +629,7 @@ public class BasicPlayer implements BasicController, Runnable {
                                     BasicPlayerListener bpl = it.next();
                                     if (m_audioInputStream instanceof PropertiesContainer) {
                                         // Pass audio parameters such as instant bitrate, ...
-                                        Map properties = ((PropertiesContainer) m_audioInputStream).properties();
+                                        Map<String,Object> properties = ((PropertiesContainer) m_audioInputStream).properties();
                                         bpl.progress(nEncodedBytes, m_line.getMicrosecondPosition(), pcm, properties);
                                     } else {
                                         bpl.progress(nEncodedBytes, m_line.getMicrosecondPosition(), pcm, empty_map);
@@ -862,12 +858,12 @@ public class BasicPlayer implements BasicController, Runnable {
      * @param src
      * @return
      */
-    protected Map deepCopy(Map src) {
-        HashMap map = new HashMap();
+    protected Map<String,Object> deepCopy(Map<String,Object> src) {
+        HashMap<String,Object> map = new HashMap<String,Object>();
         if (src != null) {
-            Iterator it = src.keySet().iterator();
+            Iterator<String> it = src.keySet().iterator();
             while (it.hasNext()) {
-                Object key = it.next();
+                String key = it.next();
                 Object value = src.get(key);
                 map.put(key, value);
             }

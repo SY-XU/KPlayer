@@ -4,15 +4,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.custom.StackLayout;
 
 public class BaseBox extends MessageBox implements ICallback{
 
 	protected Object result;
 	protected Shell shell;
-	private String stips="";
-	private Text text;
 
 	/**
 	 * Create the dialog.
@@ -45,10 +42,6 @@ public class BaseBox extends MessageBox implements ICallback{
 	//去掉原始open方法
 	public int open(){
 		return 0;
-	}
-	//设置信息
-	public void setMessage(String message){
-		this.stips=message;
 	}
 
 	/**

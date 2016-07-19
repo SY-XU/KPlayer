@@ -18,7 +18,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 
-import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.SWTResourceManager;
 import com.xk.player.tools.SWTTools;

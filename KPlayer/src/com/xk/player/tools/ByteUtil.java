@@ -30,7 +30,6 @@ public class ByteUtil {
                 e.printStackTrace();  
             }  
         }  
-        int size = 0;  
         int tagLen = tag.length;  
         byte[] tmp = new byte[tagLen];  
         for (int j = 0; j < len - tagLen + 1; j++) {  
@@ -42,7 +41,6 @@ public class ByteUtil {
                 if (tmp[i] != tag[i])  
                     break;  
                 if (i == tagLen - 1) {  
-                    size++;  
                     return j;  
                 }  
             }  
@@ -80,7 +78,6 @@ public class ByteUtil {
                 e.printStackTrace();  
             }  
         }  
-        int size = 0;  
         int tagLen = tag.length;  
         byte[] tmp = new byte[tagLen];  
         for (int j = len - tagLen; j >= 0; j--) {  
@@ -92,7 +89,6 @@ public class ByteUtil {
                 if (tmp[i] != tag[i])  
                     break;  
                 if (i == tagLen - 1) {  
-                    size++;  
                     return j;  
                 }  
             }  

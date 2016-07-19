@@ -2,7 +2,6 @@ package com.xk.player.tools;
 
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.jsoup.Jsoup;
@@ -47,22 +46,5 @@ public class HttpClientTest {
 		return scripts;
 	}
 	
-	private static String GetCharset(Elements charsets) {
-		String charset="";
-		for(Element sets:charsets){
-			if(sets.attr("content").indexOf("charset=")>=0){
-				String[] chars=sets.attr("content").split(";");
-				if(chars!=null&&chars.length==2){
-					charset=chars[1].trim();
-					charset=charset.substring(charset.indexOf("=")+1, charset.length()).trim();
-					return charset;
-				}
-			}
-			if(sets.attr("charset")!=null){
-				return sets.attr("charset");
-			}
-		}
-		return charset;
-	}
 
 }

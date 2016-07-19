@@ -1,10 +1,7 @@
 package com.xk.player.ui;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +9,6 @@ import java.util.Random;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.cmc.music.common.ID3ReadException;
 import org.cmc.music.metadata.MusicMetadata;
 import org.cmc.music.metadata.MusicMetadataSet;
 import org.cmc.music.myid3.MyID3;
@@ -26,8 +22,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -41,7 +35,6 @@ import com.xk.player.core.BasicPlayerListener;
 import com.xk.player.lrc.LyricFrame;
 import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
-import com.xk.player.tools.ID3Tag;
 import com.xk.player.tools.Loginer;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongLocation;
@@ -72,7 +65,7 @@ public class PlayUI implements BasicPlayerListener{
 	private ColorLabel playButton;
 	private Jindutiao jindutiao;
 	private Jindutiao voice;
-	private Map audioInfo;
+	private Map<String,Object> audioInfo;
 	private MyList searchResult;;
 	private MyList list;
 	private MyList types;
@@ -866,7 +859,7 @@ public class PlayUI implements BasicPlayerListener{
 	 * 打开音频同时需要进行一些变量初始化
 	 */
 	@Override
-	public void opened(Object stream, Map properties) {
+	public void opened(Object stream, Map<String,Object> properties) {
 		lrcOffset=0;
 		jumpedMillan=0;
 		timeNow=0;
@@ -889,7 +882,7 @@ public class PlayUI implements BasicPlayerListener{
 	}
 
 	@Override
-	public void progress(int bytesread, long microseconds, byte[] pcmdata, Map properties) {
+	public void progress(int bytesread, long microseconds, byte[] pcmdata, Map<String,Object> properties) {
 		final long realTime=jumpedMillan+microseconds/1000;
 		double per=realTime/(double)jindutiao.getAll();
 		jindutiao.setPersent(per,true);

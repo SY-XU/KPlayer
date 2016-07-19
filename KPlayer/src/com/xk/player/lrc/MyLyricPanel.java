@@ -233,7 +233,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
     }
 
     @Override
-	public void opened(Object stream, Map properties) {
+	public void opened(Object stream, Map<String,Object> properties) {
     	nowTime=0;
 		lines=null;
 		cur=0;
@@ -273,7 +273,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 
 	@Override
 	public void progress(int bytesread, long microseconds, byte[] pcmdata,
-			Map properties) {
+			Map<String,Object> properties) {
 		long now=ui.jumpedMillan+microseconds/1000;
 		if(now-nowTime>70){
 			nowTime=now;

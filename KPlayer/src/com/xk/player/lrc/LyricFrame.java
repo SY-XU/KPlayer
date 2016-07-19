@@ -14,21 +14,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseWheelEvent;
-import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.JWindow;
 
 import com.sun.awt.AWTUtilities;
-import com.xk.player.core.BasicController;
-import com.xk.player.core.BasicPlayerEvent;
-import com.xk.player.core.BasicPlayerListener;
-import com.xk.player.tools.FileUtils;
-import com.xk.player.tools.JSONUtil;
-import com.xk.player.tools.KrcText;
-import com.xk.player.tools.LrcParser;
 import com.xk.player.ui.PlayUI;
 
 
@@ -43,6 +33,10 @@ import com.xk.player.ui.PlayUI;
  */
 public class LyricFrame extends JWindow {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5530853132323975694L;
 	private Integer startX=null;
 	private Integer startY=null;
 	private MyLyricPanel ly;

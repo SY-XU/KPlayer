@@ -41,7 +41,7 @@ public interface BasicPlayerListener {
      * @param stream could be File, URL or InputStream
      * @param properties audio stream properties.
      */
-    public void opened(Object stream, Map properties);
+    public void opened(Object stream, Map<String,Object> properties);
 
     /**
      * Progress callback while playing.
@@ -55,7 +55,7 @@ public interface BasicPlayerListener {
      * @param pcmdata PCM samples.
      * @param properties audio stream parameters.
      */
-    public void progress(int bytesread, long microseconds, byte[] pcmdata, Map properties);
+    public void progress(int bytesread, long microseconds, byte[] pcmdata, Map<String,Object> properties);
 
     /**
      * Notification callback for basicplayer events such as opened, eom ...

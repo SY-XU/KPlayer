@@ -16,16 +16,11 @@ import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
@@ -38,26 +33,12 @@ import javax.swing.JToggleButton;
 public final class Util {
 
     public static String VERSION = "1.2";//版本号,用于对比更新
-    private static Logger log = Logger.getLogger(Util.class.getName());
     private static final JPanel panel = new JPanel();
-    private static final JFileChooser jfc = new JFileChooser();
 
     private Util() {
     }
 
 
-    /**
-     * 根据远程取到的版本和现在的版本对比
-     * 看能不能更新
-     * @param version 远程的版本
-     * @return 能不能更新
-     */
-    private static boolean canUpdate(String version) {
-        if (version == null) {
-            return false;
-        }
-        return VERSION.compareTo(version) < 0;
-    }
 
 
 
@@ -472,35 +453,6 @@ public final class Util {
     }
 
 
-    /**
-     * 从一个流里面得到这个流的字符串
-     * 表现形式
-     * @param is 流
-     * @return 字符串
-     */
-    private static String getString(InputStream is) {
-        InputStreamReader r = null;
-        try {
-            StringBuilder sb = new StringBuilder();
-            //TODO 这里是固定把网页内容的编码写在GBK,应该是可设置的
-            r = new InputStreamReader(is, "GBK");
-            char[] buffer = new char[128];
-            int length = -1;
-            while ((length = r.read(buffer)) != -1) {
-                sb.append(new String(buffer, 0, length));
-            }
-            return sb.toString();
-        } catch (Exception ex) {
-            Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
-            return "";
-        } finally {
-            try {
-                r.close();
-            } catch (Exception ex) {
-                Logger.getLogger(Util.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
 
     /**
      * 秒数转成00:00之类的字符串
@@ -533,16 +485,6 @@ public final class Util {
         str = str.replace(".", "");
         str = str.replace("\"", "‘");
         str = str.replace("'", "‘");
-        return str;
-    }
-
-    private static String htmlTrim2(String str1) {
-        String str = "";
-        str = str1;
-        //剔出了<html>的标签
-        str = str.replaceAll("<BR>", "\n");
-        str = str.replaceAll("<br>", "\n");
-        str = str.replaceAll("</?[^>]+>", "");
         return str;
     }
 

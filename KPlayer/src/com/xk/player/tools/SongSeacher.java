@@ -32,12 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.TreeItem;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
@@ -80,7 +74,7 @@ public class SongSeacher {
 			Elements texts=doc.getElementsByAttribute("lazy_src");
 			for(Element ele:texts){
 				String alt=ele.attr("alt");
-				if(null!=alt&&alt.contains(name)){
+				if(null!=alt&&alt.contains(name.replace(" ", "&nbsp;"))){
 					return ele.attr("lazy_src");
 				}
 			}
@@ -92,36 +86,37 @@ public class SongSeacher {
 		List<SearchInfo> lrcs=new ArrayList<SearchInfo>();
 		String searchUrl=null;
 		try {
-			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=lyric&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
+			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=music&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
 		} catch (UnsupportedEncodingException e) {
 			return lrcs;
 		}
 		String html=Loginer.getInstance("search").getHtml(searchUrl);
 		if(!StringUtil.isBlank(html)){
 			Document doc=Jsoup.parse(html);
-			Elements eles=doc.select("div[class=textWrap]");
-			if(eles.size()==1){
-				Element div=eles.get(0);
-				Elements texts=div.select("div[class=text]");
-				if(texts.size()>0){
-					for(int i=0;i<texts.size();i++){
-						SearchInfo info=new SearchInfo();
-						Element text=texts.get(i);
-						Elements as=text.getElementsByTag("a");
-						for(Element a:as){
-							if(a.hasClass("songLink")){
-								info.name=a.attr("title");
-								info.url=a.attr("href");
-							}else{
-								info.singer=a.attr("title");
-							}
-						}
-						lrcs.add(info);
+			Elements eles=doc.select("li[class=clearfix]");
+			for(Element ele:eles){
+				SearchInfo info=new SearchInfo();
+				lrcs.add(info);
+				Elements names=ele.getElementsByAttributeValue("class", "m_name");
+				for(Element nameP:names){
+					Elements as=nameP.getElementsByTag("a");
+					for(Element a:as){
+						info.name=a.attr("title");
+						info.url=a.attr("href");
+						break;
 					}
+					break;
 				}
-				
+				Elements singers=ele.getElementsByAttributeValue("class", "s_name");
+				for(Element singer:singers){
+					Elements as=singer.getElementsByTag("a");
+					for(Element a:as){
+						info.singer=a.attr("title");
+						break;
+					}
+					break;
+				}
 			}
-			
 		}
 		return lrcs;
 		

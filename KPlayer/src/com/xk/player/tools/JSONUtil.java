@@ -20,7 +20,7 @@ public static ObjectMapper mapper=new ObjectMapper();
 			JavaType jType=getCollectionType(Map.class,String.class,Object.class);
 			return mapper.readValue(params, jType);
 		} catch (Exception e) {
-			return Collections.EMPTY_MAP;
+			return Collections.emptyMap();
 		} 
 	}
 	
