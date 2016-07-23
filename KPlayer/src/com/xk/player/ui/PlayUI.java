@@ -885,7 +885,7 @@ public class PlayUI implements BasicPlayerListener{
 		jumpedMillan=0;
 		timeNow=0;
 		audioInfo=properties;
-		final long all="Monkey's Audio (ape)".equals(properties.get("audio.type"))?(long) properties.get("duration"):(long) properties.get("duration")/1000;
+		final long all="Monkey's Audio (ape)".equals(properties.get("audio.type"))?(Long) properties.get("duration"):(Long) properties.get("duration")/1000;
 		jindutiao.setAll( (all));
 		jindutiao.setPersent(0d,true);
 		Display.getDefault().asyncExec(new Runnable() {
