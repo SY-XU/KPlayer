@@ -73,6 +73,7 @@ public class SongSearchItem extends LTableItem {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				PlayUI.getInstance().addFile(file.getAbsolutePath(),false);
 				persent=0;
 				downloading=false;
 				flush();

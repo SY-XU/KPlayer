@@ -38,7 +38,6 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 	private List<XRCLine>lines;
 	private int cur=0;
 	private int left=0;
-	private Image lrcImg;
 	private ReentrantLock lock;
 	private Condition cond;
 	private Condition drawCond;
@@ -121,9 +120,6 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 			return;
 		}
 		GC g=event.gc;
-		if(null!=lrcImg){
-			g.drawImage(lrcImg, 0, 0);
-		}
 		boolean adv=g.getAdvanced();
 		g.setAdvanced(true);
 		g.setAntialias(SWT.ON);
@@ -232,20 +228,6 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 	}
 	
 
-
-	public Image getLrcImg() {
-		return lrcImg;
-	}
-
-
-	public void setLrcImg(Image lrcImg) {
-		if(null!=this.lrcImg){
-			this.lrcImg.dispose();
-		}
-		this.lrcImg = lrcImg;
-	}
-
-
 	public synchronized void setLines(List<XRCLine> lines) {
 		if(drawing){
 			lock.lock();
@@ -265,7 +247,6 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 		nowTime=0;
 		setLines(null);
 		cur=0;
-		lrcImg=null;
 		pause(false);
 		Long allLength="Monkey's Audio (ape)".equals(properties.get("audio.type"))?(long) properties.get("duration")*1000L:(long) properties.get("duration");
 		if(stream instanceof File){

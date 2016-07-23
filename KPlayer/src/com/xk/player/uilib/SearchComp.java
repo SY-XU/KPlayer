@@ -5,7 +5,8 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.wb.swt.SWTResourceManager;
+
+import com.xk.player.tools.SWTResourceManager;
 
 
 public class SearchComp extends Composite implements ICallable{

@@ -23,7 +23,6 @@ import com.xk.player.uilib.listeners.DragListener;
 public class Jindutiao extends Composite {
 
 	private int height=20;
-	
 	private List<DragListener>lissteners=new ArrayList<DragListener>();
 	private int width;
 	private double allLength;

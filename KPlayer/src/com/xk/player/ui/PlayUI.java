@@ -36,6 +36,7 @@ import com.xk.player.lrc.LyricFrame;
 import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.Loginer;
+import com.xk.player.tools.SWTResourceManager;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SongSeacher;
@@ -53,7 +54,6 @@ import com.xk.player.uilib.listeners.ItemListener;
 import com.xk.player.uilib.listeners.ItemSelectionEvent;
 import com.xk.player.uilib.listeners.ItemSelectionListener;
 
-import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.widgets.Label;
 import static com.xk.player.core.BasicPlayerEvent.*;
 
@@ -90,6 +90,18 @@ public class PlayUI implements BasicPlayerListener{
 	
 	private long lrcOffset=0l;//歌词延迟，前进
 	
+	private static PlayUI instance;
+	
+	public static PlayUI getInstance(){
+		if(null==instance){
+			instance=new PlayUI();
+		}
+		return instance;
+	}
+	
+	private PlayUI(){
+		
+	}
 	
 	/**
 	 * Launch the application.
@@ -97,7 +109,7 @@ public class PlayUI implements BasicPlayerListener{
 	 */
 	public static void main(String[] args) {
 		try {
-			PlayUI window = new PlayUI();
+			PlayUI window = PlayUI.getInstance();
 			Config.getInstance();
 			window.open();
 		} catch (Throwable e) {
@@ -145,6 +157,7 @@ public class PlayUI implements BasicPlayerListener{
 			public void widgetDisposed(DisposeEvent arg0) {
 				closed=true;
 				Config.getInstance().save();
+				SWTResourceManager.dispose();
 				System.exit(0);
 			}
 		});
@@ -389,7 +402,7 @@ public class PlayUI implements BasicPlayerListener{
 				fd.setText("添加音乐");
 				String path=fd.open();
 				if(null!=path&&!path.isEmpty()){
-					addFile(path);
+					addFile(path,true);
 				}
 				list.flush();
 			}
@@ -417,7 +430,7 @@ public class PlayUI implements BasicPlayerListener{
 							}
 						});
 						for(String path:mp3s){
-							addFile(dir+File.separator+path);
+							addFile(dir+File.separator+path,true);
 						}
 						list.flush();
 					}
@@ -543,7 +556,7 @@ public class PlayUI implements BasicPlayerListener{
 				list.clearAll();
 				if(index==0){
 					for(String path:Config.getInstance().songList){
-						addFile(path);
+						addFile(path,true);
 					}
 					Display.getDefault().asyncExec(new Runnable() {
 						public void run() {
@@ -552,7 +565,7 @@ public class PlayUI implements BasicPlayerListener{
 					});
 				}else{
 					for(String path:Config.getInstance().favoriteList){
-						addFile(path);
+						addFile(path,true);
 					}
 					Display.getDefault().asyncExec(new Runnable() {
 						public void run() {
@@ -683,7 +696,7 @@ public class PlayUI implements BasicPlayerListener{
 		}
 	}
 	
-	private void addFile(String path){
+	public void addFile(String path,boolean sync){
 		int tps=types.getSelectIndex();
 		if(tps==0){
 			if(!Config.getInstance().songList.contains(path)){
@@ -745,6 +758,14 @@ public class PlayUI implements BasicPlayerListener{
 			list.addItem(item);
 			if(list.getItemCount()-1==selections[tps]){
 				item.select();
+			}
+			if(!sync){
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						list.flush();
+					}
+				});
+				
 			}
 		}
 	}
