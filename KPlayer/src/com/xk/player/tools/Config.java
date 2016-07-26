@@ -39,8 +39,8 @@ public class Config {
 	public String lrcPath="e:/download";
 	
 	//播放列表
-	public List<String> songList=new ArrayList<>();
-	public List<String> favoriteList=new ArrayList<>();
+	public List<String> songList=new ArrayList<String>();
+	public List<String> favoriteList=new ArrayList<String>();
 
 	@JsonIgnore
 	public Map<String,Map<String,String>> maps=new HashMap<String,Map<String,String>>();

@@ -30,12 +30,12 @@ public class MyList extends Composite {
 
 	public static final int BAR_WIDTH=8;//滚动条宽度
 	private static final int BAR_ARROW_HEIGHT=8;
-	private List<ItemListener> itemListeners=new ArrayList<>();
-	private List<ItemSelectionListener> selectionListeners=new ArrayList<>();
+	private List<ItemListener> itemListeners=new ArrayList<ItemListener>();
+	private List<ItemSelectionListener> selectionListeners=new ArrayList<ItemSelectionListener>();
 	private int allHeight=0;
 	private int width;
 	private int height;
-	private List<ListItem>items=new ArrayList<>();
+	private List<ListItem>items=new ArrayList<ListItem>();
 	protected ListItem selected=null;
 	protected int selectIndex=-1;
 	private ListItem focused=null;

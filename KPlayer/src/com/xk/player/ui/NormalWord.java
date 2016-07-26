@@ -248,7 +248,7 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 		setLines(null);
 		cur=0;
 		pause(false);
-		Long allLength="Monkey's Audio (ape)".equals(properties.get("audio.type"))?(long) properties.get("duration")*1000L:(long) properties.get("duration");
+		Long allLength= ("Monkey's Audio (ape)".equals(properties.get("audio.type"))?(Long)properties.get("duration")*1000L:(Long)properties.get("duration"));
 		if(stream instanceof File){
 			File file=(File) stream;
 			songName =file.getName().substring(0, file.getName().lastIndexOf("."));
