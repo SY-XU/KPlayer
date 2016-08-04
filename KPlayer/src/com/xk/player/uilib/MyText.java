@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
-import com.xk.player.tools.SWTResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class MyText extends StyledText implements PaintListener{
 	private Image end;

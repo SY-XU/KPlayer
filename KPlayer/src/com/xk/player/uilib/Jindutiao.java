@@ -16,7 +16,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
-import com.xk.player.tools.SWTResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.player.uilib.listeners.DragEvent;
 import com.xk.player.uilib.listeners.DragListener;
 

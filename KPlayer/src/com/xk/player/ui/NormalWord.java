@@ -1,6 +1,8 @@
 package com.xk.player.ui;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
@@ -11,7 +13,6 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.LineAttributes;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Pattern;
@@ -30,12 +31,13 @@ import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.JSONUtil;
 import com.xk.player.tools.KrcText;
 import com.xk.player.tools.LrcParser;
-import com.xk.player.tools.SWTResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 
 public class NormalWord extends Canvas implements PaintListener,BasicPlayerListener{
 
 	private List<XRCLine>lines;
+	private List<Long>times=new ArrayList<>();
 	private int cur=0;
 	private int left=0;
 	private ReentrantLock lock;
@@ -154,17 +156,29 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
         path.dispose();
 	}
 	
+	private int findCur(long time){
+		for(int i=times.size()-1;i>=0;i--){
+			if(time>times.get(i)){
+				return i;
+			}
+		}
+		return 0;
+	}
+	
+	
 	private void drawXRC(GC g){
 		long timeOffset=ui.getLrcOffset();
 		long time=nowTime+timeOffset;
+		cur=findCur(time);
 		XRCLine currentLine=lines.get(cur);
-		if(currentLine.start!=null&&currentLine.length!=null&&(time>currentLine.start+currentLine.length)){
-			cur++;
-			if(cur<lines.size()){
-				currentLine=lines.get(cur);
-			}else{
-				cur--;
-			}
+		if(currentLine.start==null||currentLine.length==null){
+//			cur++;
+//			if(cur<lines.size()){
+//				currentLine=lines.get(cur);
+//			}else{
+//				cur--;
+//			}
+			return;
 		}
 		float[] dashList = new float[]{255,255};
 		Font ft=SWTResourceManager.getFont( "楷体", 22,SWT.NORMAL);
@@ -239,6 +253,13 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 			}
 		}
 		this.lines = lines;
+		times.clear();
+		if(null!=lines){
+			for(XRCLine line:lines){
+				times.add(line.start);
+			}
+			Collections.sort(times);
+		}
 		cur=0;
 	}
 

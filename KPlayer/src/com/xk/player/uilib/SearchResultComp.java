@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Label;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.Loginer;
 import com.xk.player.tools.LrcInfo;
-import com.xk.player.tools.SWTResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 import com.xk.player.ui.LTableItem;

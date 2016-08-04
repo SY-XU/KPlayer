@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 
 import com.xk.player.tools.FileUtils;
-import com.xk.player.tools.SWTResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;

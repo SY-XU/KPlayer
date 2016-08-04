@@ -10,7 +10,8 @@ import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Display;
 
 import com.xk.player.tools.FileUtils;
-import com.xk.player.tools.SWTResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
+import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 import com.xk.player.uilib.ListItem;
 import com.xk.player.uilib.MyList;
@@ -20,9 +21,11 @@ public abstract class LTableItem extends ListItem {
 	protected int persent=0; 
 	protected SearchInfo info;
 	private boolean head=false;
+	private Image down;
 	
 	public LTableItem(SearchInfo info){
 		this.info=info;
+		down=SWTResourceManager.getImage(getClass(), "/images/download.png");
 	}
 	
 	@Override
@@ -55,8 +58,7 @@ public abstract class LTableItem extends ListItem {
 			if(downloading){
 				hqp.addString(persent+"%", 400, start+8, hqf);
 			}else{
-				Image img=SWTResourceManager.getImage(getClass(), "/images/download.png");
-				gc.drawImage(img, 400, start);
+				gc.drawImage(down, 400, start);
 			}
 			hqp.addString((index-1)+"", 20, start+8, hqf);
 			

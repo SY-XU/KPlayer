@@ -19,11 +19,9 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -38,16 +36,18 @@ import com.xk.player.lrc.LyricFrame;
 import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.Loginer;
-import com.xk.player.tools.SWTResourceManager;
+import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.uilib.BaseBox;
 import com.xk.player.uilib.ColorLabel;
 import com.xk.player.uilib.Jindutiao;
 import com.xk.player.uilib.ListItem;
 import com.xk.player.uilib.MyList;
 import com.xk.player.uilib.MyText;
+import com.xk.player.uilib.SettingComp;
 import com.xk.player.uilib.MyText.DeleteListener;
 import com.xk.player.uilib.listeners.DragEvent;
 import com.xk.player.uilib.listeners.DragListener;
@@ -146,16 +146,7 @@ public class PlayUI implements BasicPlayerListener{
 		Config config=Config.getInstance();
 		shell = new Shell(SWT.NO_TRIM);
 		Image source=config.BGTYPE==0?SWTResourceManager.getImage(PlayUI.class, config.BGPATH):SWTResourceManager.getImage(config.BGPATH);
-		Image tmp=new Image(null, 1000, 666);
-		GC gc=new GC(tmp);
-		gc.setAdvanced(true);
-		gc.setAntialias(SWT.ON);
-		Transform trans=new Transform(null);
-		trans.scale(1000f/source.getImageData().width, 666f/source.getImageData().height);
-		gc.setTransform(trans);
-		gc.drawImage(source, 0, 0);
-		gc.dispose();
-		shell.setBackgroundImage(tmp);
+		shell.setBackgroundImage(SWTTools.scaleImage(source.getImageData(), 1000, 666));
 		shell.setImage(SWTResourceManager.getImage(PlayUI.class, "/images/jindutiao.png"));
 		shell.setSize(1000, 666);
 		shell.setText("Kplayer");
@@ -197,16 +188,7 @@ public class PlayUI implements BasicPlayerListener{
 						shell.getBackground().dispose();
 					}
 					Image img=SWTResourceManager.getImage(path);
-					Image tmp=new Image(null, 1000, 666);
-					GC gc=new GC(tmp);
-					gc.setAdvanced(true);
-					gc.setAntialias(SWT.ON);
-					Transform trans=new Transform(null);
-					trans.scale(1000f/img.getImageData().width, 666f/img.getImageData().height);
-					gc.setTransform(trans);
-					gc.drawImage(img, 0, 0);
-					gc.dispose();
-					shell.setBackgroundImage(tmp);
+					shell.setBackgroundImage(SWTTools.scaleImage(img.getImageData(), 1000, 666));
 					Config.getInstance().BGTYPE=1;
 					Config.getInstance().BGPATH=path;
 				}
@@ -384,8 +366,8 @@ public class PlayUI implements BasicPlayerListener{
 		});
 		
 		ImageData heartData=heart.getImageData().scaledTo(20, 20);
-		Image hImage=new Image(null, heartData);
-		ColorLabel myLove = new ColorLabel(shell, SWT.NONE,hImage,hImage);
+		Image hi=new Image(null,heartData);
+		ColorLabel myLove = new ColorLabel(shell, SWT.NONE,hi,hi);
 		myLove.setBounds(341, 12, 25, 25);
 		myLove.addMouseListener(new MouseAdapter() {
 			@Override
@@ -476,6 +458,17 @@ public class PlayUI implements BasicPlayerListener{
 		ColorLabel settingLabel = new ColorLabel(shell, SWT.NONE, setting, setting);
 		settingLabel.setBounds(955, 310, 25, 25);
 		settingLabel.setToolTipText("设置");
+		settingLabel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent arg0) {
+				BaseBox bb=new BaseBox(shell, SWT.NO_TRIM);
+				bb.getShell().setSize(450, 325);
+				SWTTools.centerWindow(bb.getShell());
+				SettingComp comp=new SettingComp(bb.getShell(), SWT.NONE);
+				bb.add(comp);
+				Object result=bb.open(0, 0);
+			}
+		});
 		
 		ColorLabel forwardLabel = new ColorLabel(shell, SWT.NONE, forward, forward);
 		forwardLabel.setBounds(955, 350, 25, 25);
@@ -682,8 +675,7 @@ public class PlayUI implements BasicPlayerListener{
 						if(null!=loc){
 							ImageData[] img=new ImageLoader().load(loc.input);
 							if(null!=img&&img.length>0){
-								Image head=new Image(null,img[0].scaledTo(50, 50));
-								item.setHead(head);
+								item.setHead(SWTTools.scaleImage(img[0], 50, 50));
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
 										item.getParent().flush();
