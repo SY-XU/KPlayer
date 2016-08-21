@@ -564,6 +564,7 @@ public class PlayUI implements BasicPlayerListener{
 				int index=types.getSelectIndex();
 				list.clearAll();
 				if(index==0){
+					selections[1]=-1;
 					for(String path:Config.getInstance().songList){
 						addFile(path,true);
 					}
@@ -573,6 +574,7 @@ public class PlayUI implements BasicPlayerListener{
 						}
 					});
 				}else{
+					selections[0]=-1;
 					for(String path:Config.getInstance().favoriteList){
 						addFile(path,true);
 					}
