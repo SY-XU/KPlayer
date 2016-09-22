@@ -987,4 +987,11 @@ public class BasicPlayer implements BasicController, Runnable {
             return -1;
         }
     }
+    
+    public void close(){
+    	if(null != laucher){
+    		laucher.setAlive(false);
+    		laucher.interrupt();
+    	}
+    }
 }

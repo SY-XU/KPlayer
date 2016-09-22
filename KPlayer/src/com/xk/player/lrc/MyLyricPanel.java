@@ -90,7 +90,9 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 
 
 	
-	
+	/**
+	 * 绘制条件判断
+	 */
     protected void paintComponent(Graphics g) {
     	temp*=-1;
     	setSize(getSize().width, getSize().height+temp);
@@ -109,18 +111,23 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
         gd.dispose();
     }
 
+    
+    /**
+     * 绘制歌词
+     * @param g
+     */
     private void update(Graphics2D g){
     	if(nowTime==0){
 			g.dispose();
 			return;
 		}
-    	long time=ui.getLrcOffset()+nowTime;
+    	long time=ui.getLrcOffset()+nowTime;//获取当前歌曲时间，加上前进后退值
     	Font ft=new Font("楷体",Font.PLAIN,36);
     	g.setFont(ft);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
 		
 		XRCLine currentLine=lines.get(cur);
-		if(currentLine.start!=null&&currentLine.length!=null&&(time>currentLine.start+currentLine.length)){
+		if(currentLine.start!=null&&currentLine.length!=null&&(time>currentLine.start+currentLine.length)){//不完整的歌词或最后一句
 			cur++;
 			if(cur<lines.size()){
 				currentLine=lines.get(cur);
@@ -136,7 +143,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		}
 		
         
-        XRCLine other=null;
+        XRCLine other=null;//下一句
         if(cur==0){
 			if(currentLine.nodes.size()>1){
 				other=lines.get(cur+1);
@@ -148,7 +155,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		}else if((double)(time-currentLine.start)/currentLine.length<=0.01){
 			other=lines.get(cur-1);
 		}
-        if(null!=other){
+        if(null!=other){//绘制下一句歌词
         	Graphics2D gc=(Graphics2D) g.create();
         	gc.setPaint(Color.GREEN);
         	FontMetrics fm=gc.getFontMetrics();
@@ -162,7 +169,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
         	gc.fill(shape);
         }
         
-        for(int i=currentLine.nodes.size()-1;i>=0;i--){
+        for(int i=currentLine.nodes.size()-1;i>=0;i--){//获取当前这句歌词到第几个字
         	XRCNode node=currentLine.nodes.get(i);
         	if(time>currentLine.start+node.start){
         		now=i;
@@ -170,7 +177,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
         	}
         }
         float off=0;
-        for(int i=0;i<now;i++){
+        for(int i=0;i<now;i++){//获取当前字进度百分比
         	XRCNode node=currentLine.nodes.get(i);
         	off+=Util.getStringWidth(node.word, g);
         }

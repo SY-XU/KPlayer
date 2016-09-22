@@ -20,6 +20,7 @@ public class BasicPlayerEventLauncher extends Thread {
 
     private Set<BasicPlayerListener> listeners;//保存所有监听器的集合
     private LinkedList<BasicPlayerEvent> queue;//一个保存所有事件的队列
+    private boolean alive=true;
     /**
      * 默认的构造函数,只是包内友好,
      * 别的包不能初始化本类,因为本类只是给BasicPlayer所使用的
@@ -37,6 +38,7 @@ public class BasicPlayerEventLauncher extends Thread {
     public synchronized void put(BasicPlayerEvent event) {
         queue.offer(event);
         synchronized (this) {
+        	System.out.println("thank God,总算有消息了！");
             this.notifyAll();
         }
     }
@@ -66,15 +68,16 @@ public class BasicPlayerEventLauncher extends Thread {
     }
 
     public void run() {
-        while (true) {
+        while (alive) {
             try {
 				BasicPlayerEvent event = queue.poll();
 				if (event == null) {//如果事件为空,则等待
 				    synchronized (this) {
 				        try {
+				        	System.out.println("阿西吧，居然来了个空~");
 				            this.wait();
 				        } catch (InterruptedException ex) {
-				            Logger.getLogger(BasicPlayerEventLauncher.class.getName()).log(Level.SEVERE, null, ex);
+				        	System.out.println("thread interrupted!!!");
 				        }
 				    }
 				} else {//否则就指派到指定的监听器去调用
@@ -88,4 +91,8 @@ public class BasicPlayerEventLauncher extends Thread {
         }
 
     }
+
+	public void setAlive(boolean alive) {
+		this.alive = alive;
+	}
 }

@@ -17,7 +17,10 @@ import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
+import com.xk.player.lrc.XLrcMaker;
 import com.xk.player.tools.FileUtils;
 import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.player.tools.SWTTools;
@@ -137,6 +140,32 @@ public class SongItem extends ListItem {
 				}
 				
 			});
+			
+			MenuItem createLrc = new MenuItem(m, SWT.CASCADE);
+			createLrc.setText("制作歌词");
+			
+			Menu m11=new Menu(m);
+			createLrc.setMenu(m11);
+			
+			MenuItem zlrc=new MenuItem(m11,SWT.NONE);
+			zlrc.setText("制作zlrc歌词");
+			zlrc.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e1) {
+					new XLrcMaker(property.get("path"),1);
+				}
+			});
+			
+			MenuItem lrc=new MenuItem(m11,SWT.NONE);
+			lrc.setText("制作lrc歌词");
+			lrc.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e1) {
+					new XLrcMaker(property.get("path"),2);
+				}
+			});
+			
+			
 			
 			MenuItem miSearch=new MenuItem(m, SWT.NONE);
 			miSearch.setText("搜索歌词");
