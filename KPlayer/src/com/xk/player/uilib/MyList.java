@@ -81,6 +81,12 @@ public class MyList extends Composite {
 		this.simpleSelect=simple;
 	}
 	
+	/**
+	 * 
+	 * 用途：初始化各种事件
+	 * 
+	 * @date 2016年9月29日
+	 */
 	private void initEvent(){
 		back.addMouseListener(new MouseListener() {
 			

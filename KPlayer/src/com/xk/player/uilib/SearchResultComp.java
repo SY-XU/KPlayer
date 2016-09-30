@@ -9,7 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import com.xk.player.tools.FileUtils;
-import com.xk.player.tools.Loginer;
+import com.xk.player.tools.HTTPUtil;
 import com.xk.player.tools.LrcInfo;
 import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.player.tools.SongSeacher;
@@ -114,7 +114,7 @@ public class SearchResultComp extends Composite implements ICallable{
 				@Override
 				public void run() {
 					String url=info.url;
-					String html=Loginer.getInstance("player").getHtml(url);
+					String html=HTTPUtil.getInstance("player").getHtml(url);
 					persent=30;
 					flush();
 					try {

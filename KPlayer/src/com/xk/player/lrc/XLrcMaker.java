@@ -43,6 +43,11 @@ import com.xk.player.tools.LrcInfo;
 import com.xk.player.tools.LrcParser;
 
 
+/**
+ * 歌词制作器
+ * @author xiaokui
+ *
+ */
 public class XLrcMaker implements BasicPlayerListener {
 	private BasicPlayer player;
 	protected Shell shell;
@@ -81,6 +86,11 @@ public class XLrcMaker implements BasicPlayerListener {
 		open(path);
 	}
 
+	/**
+	 * 读取已知歌词
+	 * @param path
+	 * @throws Exception
+	 */
 	private void prepare(String path) throws Exception {
 		File songWord = new File(path.substring(0, path.lastIndexOf(".")) + ".zlrc");
 		if(songWord.exists()){

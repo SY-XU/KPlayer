@@ -1,5 +1,10 @@
 package com.xk.player.lrc;
 
+/**
+ * 单个歌词
+ * @author o-kui.xiao
+ *
+ */
 public class XRCNode {
 
 	public Long start;

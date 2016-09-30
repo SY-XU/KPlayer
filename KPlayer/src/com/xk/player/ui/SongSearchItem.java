@@ -5,7 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import com.xk.player.tools.Config;
-import com.xk.player.tools.Loginer;
+import com.xk.player.tools.HTTPUtil;
 import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 
@@ -27,15 +27,15 @@ public class SongSearchItem extends LTableItem {
 			public void run() {
 				Config conf=Config.getInstance();
 				String url=info.url;
-				String realUrl=Loginer.getInstance("player").getHtml(url);
-				SongLocation loc=Loginer.getInstance("player").getInputStream(realUrl);
+				String realUrl=HTTPUtil.getInstance("player").getHtml(url);
+				SongLocation loc=HTTPUtil.getInstance("player").getInputStream(realUrl);
 				String parent=conf.downloadPath;
 				if(null==parent||parent.trim().isEmpty()){
 					parent="e:/download";
 					conf.downloadPath=parent;
 					conf.lrcPath=parent;
 				}
-				File file=new File(conf.downloadPath,info.singer+" - "+info.name+".mp3");
+				File file=new File(conf.downloadPath,info.singer+" - "+info.name+"."+info.type);
 				if(!file.exists()){
 					FileOutputStream out=null;
 					try {

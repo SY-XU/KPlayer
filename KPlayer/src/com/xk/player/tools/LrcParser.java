@@ -20,7 +20,9 @@ import com.xk.player.lrc.XRCLine;
 import com.xk.player.lrc.XRCNode;
   
 /**  
- * 此类用来解析LRC文件 将解析完整的LRC文件放入一个LrcInfo对象中 并且返回这个LrcInfo对象s author:java_mzd  
+ * 此类用来解析LRC文件 将解析完整的LRC文件放入一个LrcInfo对象中 并且返回这个LrcInfo对象s 
+ * 
+ *  @author xiaokui
  */  
 public class LrcParser {   
     private LrcInfo lrcinfo = new LrcInfo();   

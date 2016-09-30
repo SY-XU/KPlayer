@@ -33,7 +33,7 @@ import com.xk.player.ui.PlayUI;
 
 /**
  *
- * @author hadeslee
+ * @author xiaokui
  */
 public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListener  {
 
@@ -68,6 +68,10 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		return lines;
 	}
 
+    /**
+     * 设置歌词数据
+     * @param lines
+     */
 	public void setLines(List<XRCLine> lines) {
 		if(drawing ){
 			lock.lock();
@@ -201,6 +205,10 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
         
     }
 
+    /**
+     * 暂停
+     * @param paused
+     */
     private void pause(boolean paused){
 		this.paused=paused;
 		if(!paused){

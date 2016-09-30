@@ -33,21 +33,21 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 
-public class Loginer {
+public class HTTPUtil {
 	public CloseableHttpClient httpClient = HttpClientUtils.createSSLClientDefault();
 	public static String cid=null;
-	private static Map<String,Loginer> maps=new HashMap<String,Loginer>();
+	private static Map<String,HTTPUtil> maps=new HashMap<String,HTTPUtil>();
 	
-	public static Loginer getInstance(String name){
-		Loginer instance=maps.get(name);
+	public static HTTPUtil getInstance(String name){
+		HTTPUtil instance=maps.get(name);
 		if(null==instance){
-			instance=new Loginer(name);
+			instance=new HTTPUtil(name);
 			maps.put(name, instance);
 		}
 		return instance;
 	}
 	
-	private Loginer(String name){
+	private HTTPUtil(String name){
 		
 	}
 	
@@ -231,6 +231,8 @@ public class Loginer {
         response.close();
 		return result.toString();
 	}
+	
+	
 	public String readJsonfromURL2(String url,Map<String,String> params) throws ClientProtocolException, IOException{
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 		if(null!=params){
@@ -351,7 +353,7 @@ public class Loginer {
 	}
 	
 	public static void main(String[]args){
-		Loginer l=Loginer.getInstance("");
+		HTTPUtil l=HTTPUtil.getInstance("");
 		String url="http://mobilecdn.kugou.com/new/app/i/krc.php?keyword=%E5%BC%A0%E9%9D%93%E9%A2%96%E3%80%81%E7%8E%8B%E9%93%AE%E4%BA%AE%20-%20%E5%8F%AA%E6%98%AF%E6%B2%A1%E6%9C%89%E5%A6%82%E6%9E%9C&timelength=295000&type=1&cmd=200&hash=6253cbe1069ac2378c0028e93a1afe3f";
 		File file=new File("e:/download/只是没有如果.krc");
 		try {

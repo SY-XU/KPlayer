@@ -52,7 +52,7 @@ import javazoom.spi.PropertiesContainer;
 import org.tritonus.share.sampled.TAudioFormat;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 
-import com.xk.player.tools.Loginer;
+import com.xk.player.tools.HTTPUtil;
 
 import static com.xk.player.core.BasicPlayerEvent.*;
 
@@ -123,7 +123,7 @@ public class BasicPlayer implements BasicController, Runnable {
     	player.addBasicPlayerListener(listener);
     	try {
     		String url="http://win.web.ra01.sycdn.kuwo.cn/4ef64ca30113d15ecb12b423e8a56e0c/577e6864/resource/n2/192/92/78/1662312093.mp3";
-    		Loginer l=Loginer.getInstance("test");
+    		HTTPUtil l=HTTPUtil.getInstance("test");
     		player.open(l.getInput(url));
 //			player.open(new File("e:/download/薛之谦 - 演员.mp3"));
 			player.play();

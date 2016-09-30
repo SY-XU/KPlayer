@@ -35,7 +35,7 @@ import com.xk.player.core.BasicPlayerListener;
 import com.xk.player.lrc.LyricFrame;
 import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
-import com.xk.player.tools.Loginer;
+import com.xk.player.tools.HTTPUtil;
 import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongLocation;
@@ -627,7 +627,7 @@ public class PlayUI implements BasicPlayerListener{
 		String name=text.getText();
 		if(!name.isEmpty()){
 			showLrcView(false);
-			List<SearchInfo> result=SongSeacher.getSongFromKuwo(name);
+			List<SearchInfo> result=SongSeacher.getSongFromKuwo(name, Config.getInstance().searchType);
 			SearchInfo head=new SearchInfo();
 			head.album="专辑";
 			head.name="歌名";
@@ -673,7 +673,7 @@ public class PlayUI implements BasicPlayerListener{
 					String path=SongSeacher.getArtistFromKuwo(name);
 					System.out.println("path:"+path);
 					if(null!=path&&!path.isEmpty()){
-						SongLocation loc=Loginer.getInstance("player").getInputStream(path);
+						SongLocation loc=HTTPUtil.getInstance("player").getInputStream(path);
 						if(null!=loc){
 							ImageData[] img=new ImageLoader().load(loc.input);
 							if(null!=img&&img.length>0){

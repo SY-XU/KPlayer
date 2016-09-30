@@ -25,8 +25,7 @@ import com.xk.player.ui.PlayUI;
 
 
 /**
- * @项目名称：PGS
- * @类名称：TestSwing.java
+ * @类名称：LyricFrame.java
  * @类描述：
  * @创建人：xiaokui
  * 时间：2014-11-4下午1:42:21
@@ -41,10 +40,18 @@ public class LyricFrame extends JWindow {
 	private Integer startY=null;
 	private MyLyricPanel ly;
 	
+	/**
+	 * 显示/隐藏桌面歌词
+	 * @param bool
+	 */
 	public void hide(boolean bool) {
 		setVisible(bool);
 	}
 	
+	/**
+	 * 初始化桌面歌词
+	 * @param ui
+	 */
 	public LyricFrame(PlayUI ui){
 		setVisible(false);
 		AWTUtilities.setWindowOpaque(this, false);
@@ -58,6 +65,10 @@ public class LyricFrame extends JWindow {
 		enableDrag();
 	}
 	
+	
+	/**
+	 * 拖拽歌词
+	 */
 	private void enableDrag(){
 		MouseListener ml=new MouseAdapter() {
 			@Override
@@ -91,6 +102,10 @@ public class LyricFrame extends JWindow {
 		addMouseListener(ml);
 	}
 
+	/**
+	 * 设置歌词
+	 * @param lines
+	 */
 	public void setLines(List<XRCLine> lines) {
 		if(null!=ly){
 			ly.setLines(lines);

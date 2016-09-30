@@ -68,7 +68,7 @@ public class SongSeacher {
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
-		String html=Loginer.getInstance("search").getHtml(searchUrl);
+		String html=HTTPUtil.getInstance("search").getHtml(searchUrl);
 		if(!StringUtil.isBlank(html)){
 			Document doc=Jsoup.parse(html);
 			Elements texts=doc.getElementsByAttribute("lazy_src");
@@ -90,7 +90,7 @@ public class SongSeacher {
 		} catch (UnsupportedEncodingException e) {
 			return lrcs;
 		}
-		String html=Loginer.getInstance("search").getHtml(searchUrl);
+		String html=HTTPUtil.getInstance("search").getHtml(searchUrl);
 		if(!StringUtil.isBlank(html)){
 			Document doc=Jsoup.parse(html);
 			Elements eles=doc.select("li[class=clearfix]");
@@ -139,6 +139,10 @@ public class SongSeacher {
 	}
 	
 	public static List<SearchInfo> getSongFromKuwo(String name){
+		return getSongFromKuwo(name, "mp3");
+	}
+	
+	public static List<SearchInfo> getSongFromKuwo(String name, String type){
 		List<SearchInfo> songs=new ArrayList<SearchInfo>();
 		String searchUrl=null;
 		try {
@@ -146,12 +150,13 @@ public class SongSeacher {
 		} catch (UnsupportedEncodingException e) {
 			return songs;
 		}
-		String html=Loginer.getInstance("search").getHtml(searchUrl);
+		String html=HTTPUtil.getInstance("search").getHtml(searchUrl);
 		if(!StringUtil.isBlank(html)){
 			Document doc=Jsoup.parse(html);
 			Elements eles=doc.select("li[class=clearfix]");
 			for(Element ele:eles){
 				SearchInfo info=new SearchInfo();
+				info.type=type;
 				songs.add(info);
 				Elements names=ele.getElementsByAttributeValue("class", "m_name");
 				for(Element nameP:names){
@@ -181,7 +186,7 @@ public class SongSeacher {
 					break;
 				}
 				Elements numbers=ele.getElementsByAttributeValue("class", "number");
-				String download="response=url&type=convert%5Furl&rid=MUSIC%5F{mid}&format=mp3";
+				String download="response=url&type=convert%5Furl&rid=MUSIC%5F{mid}&format="+type;
 				String baseHost="http://antiserver.kuwo.cn/anti.s?";
 				for(Element number:numbers){
 					Elements as=number.getElementsByTag("input");
@@ -205,6 +210,7 @@ public class SongSeacher {
 		public String name="";
 		public String singer="";
 		public String album="";
+		public String type = "mp3";
 	}
 	
 }

@@ -42,6 +42,8 @@ public class Config {
 	public List<String> songList=new ArrayList<String>();
 	public List<String> favoriteList=new ArrayList<String>();
 
+	public String searchType = "ape";
+	
 	@JsonIgnore
 	public Map<String,Map<String,String>> maps=new HashMap<String,Map<String,String>>();
 	

@@ -5,6 +5,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+/**
+ * 解析后的歌词行
+ * @author xiaokui
+ *
+ */
 public class XRCLine {
 	public Long start;
 	public Long length;

@@ -49,6 +49,7 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 	private boolean drawing=false;
 	private String songName ="";
 	private Config config;
+	private Long allLength;
 	
 	
 	public NormalWord(Composite parent,PlayUI ui) {
@@ -263,42 +264,46 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 		cur=0;
 	}
 
+	public void loadLrc(File file) {
+		songName =file.getName().substring(0, file.getName().lastIndexOf("."));
+		String filename=file.getAbsolutePath();
+		File songWord = new File(filename.substring(0, filename
+				.lastIndexOf("."))
+				+ ".lrc");
+		File xrcWord = new File(filename.substring(0, filename
+				.lastIndexOf("."))
+				+ ".zlrc");
+		File krcWord = new File(filename.substring(0, filename
+				.lastIndexOf("."))
+				+ ".krc");
+		if(xrcWord.exists()){
+			String data=FileUtils.readString(xrcWord.getAbsolutePath());
+			List<XRCLine>lines=JSONUtil.toBean(data, JSONUtil.getCollectionType(List.class, XRCLine.class));
+			setLines(lines);
+		}else if (krcWord.exists()) {
+			List<XRCLine>lines=KrcText.fromKRC(krcWord.getAbsolutePath());
+			setLines(lines);
+		}else if (songWord.exists()) {
+			try {
+				LrcParser parser = new LrcParser(allLength);
+				List<XRCLine> lines = parser.parser(songWord.getAbsolutePath());
+				setLines(lines);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	@Override
 	public void opened(Object stream, Map<String,Object> properties) {
 		nowTime=0;
 		setLines(null);
 		cur=0;
 		pause(false);
-		Long allLength= ("Monkey's Audio (ape)".equals(properties.get("audio.type"))?(Long)properties.get("duration")*1000L:(Long)properties.get("duration"));
+		allLength= ("Monkey's Audio (ape)".equals(properties.get("audio.type"))?(Long)properties.get("duration")*1000L:(Long)properties.get("duration"));
 		if(stream instanceof File){
 			File file=(File) stream;
-			songName =file.getName().substring(0, file.getName().lastIndexOf("."));
-			String filename=file.getAbsolutePath();
-			File songWord = new File(filename.substring(0, filename
-					.lastIndexOf("."))
-					+ ".lrc");
-			File xrcWord = new File(filename.substring(0, filename
-					.lastIndexOf("."))
-					+ ".zlrc");
-			File krcWord = new File(filename.substring(0, filename
-					.lastIndexOf("."))
-					+ ".krc");
-			if(xrcWord.exists()){
-				String data=FileUtils.readString(xrcWord.getAbsolutePath());
-				List<XRCLine>lines=JSONUtil.toBean(data, JSONUtil.getCollectionType(List.class, XRCLine.class));
-				setLines(lines);
-			}else if (krcWord.exists()) {
-				List<XRCLine>lines=KrcText.fromKRC(krcWord.getAbsolutePath());
-				setLines(lines);
-			}else if (songWord.exists()) {
-				try {
-					LrcParser parser = new LrcParser(allLength);
-					List<XRCLine> lines = parser.parser(songWord.getAbsolutePath());
-					setLines(lines);
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}
+			loadLrc(file);
 		}
 	}
 

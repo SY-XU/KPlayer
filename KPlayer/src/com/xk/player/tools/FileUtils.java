@@ -72,6 +72,11 @@ public class FileUtils {
 		return source;
 	}
 	
+	/**
+	 * 获取字符串编码
+	 * @param str
+	 * @return
+	 */
 	public static String getEncoding(String str) {  
         String encode = "GB2312";  
         try {  
