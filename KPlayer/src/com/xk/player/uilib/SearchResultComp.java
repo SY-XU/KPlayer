@@ -8,6 +8,7 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.HTTPUtil;
 import com.xk.player.tools.LrcInfo;
@@ -127,7 +128,7 @@ public class SearchResultComp extends Composite implements ICallable{
 					persent=60;
 					flush();
 					try {
-						Thread.sleep(500);
+						Thread.sleep(300);
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -144,9 +145,9 @@ public class SearchResultComp extends Composite implements ICallable{
 						.append(":").append(format(second)).append(".")
 						.append(format(mil)).append("]").append(text).append("\r\n");
 					}
-					String lrcPath=path.substring(0, path.lastIndexOf("."))+".lrc";
-					File file=new File(lrcPath);
-					if(file.exists()){
+					String lrcPath = Config.getInstance().lrcPath + "/" + path + ".lrc";
+					File file = new File(lrcPath);
+					if(file.exists()) {
 						file.delete();
 					}
 					try {
@@ -156,7 +157,7 @@ public class SearchResultComp extends Composite implements ICallable{
 					persent=80;
 					flush();
 					try {
-						Thread.sleep(500);
+						Thread.sleep(300);
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -165,7 +166,7 @@ public class SearchResultComp extends Composite implements ICallable{
 					persent=100;
 					flush();
 					try {
-						Thread.sleep(500);
+						Thread.sleep(300);
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

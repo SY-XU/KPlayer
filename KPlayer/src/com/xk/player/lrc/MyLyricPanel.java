@@ -14,6 +14,8 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.font.GlyphVector;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
@@ -24,6 +26,7 @@ import javax.swing.JPanel;
 import com.xk.player.core.BasicController;
 import com.xk.player.core.BasicPlayerEvent;
 import com.xk.player.core.BasicPlayerListener;
+import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.JSONUtil;
 import com.xk.player.tools.KrcText;
@@ -39,11 +42,11 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 
 	private int temp=-1;
 	private List<XRCLine> lines;
+	private List<Long>times=new ArrayList<>();
 	private int cur=0;
 	private boolean isUp=true;
 	private boolean first=true;
     private static final long serialVersionUID = 20071214L;
-    private int now=0;
     private long nowTime=0;
     private PlayUI ui;
     private ReentrantLock lock;
@@ -83,9 +86,15 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 			}
 		}
 		this.lines = lines;
+		times.clear();
+		if(null!=lines){
+			for(XRCLine line:lines){
+				times.add(line.start);
+			}
+			Collections.sort(times);
+		}
 		nowTime=0;
 		cur=0;
-		now=0;
 		first=true;
 		isUp=true;
 		paused=false;
@@ -116,6 +125,15 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
     }
 
     
+    private int findCur(long time){
+		for(int i=times.size()-1;i>=0;i--){
+			if(time>times.get(i)){
+				return i;
+			}
+		}
+		return 0;
+	}
+    
     /**
      * 绘制歌词
      * @param g
@@ -125,22 +143,16 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 			g.dispose();
 			return;
 		}
+    	int lastCur = cur;
     	long time=ui.getLrcOffset()+nowTime;//获取当前歌曲时间，加上前进后退值
+    	cur=findCur(time);
+    	if(cur != lastCur) {
+    		isUp=!isUp;
+    	}
     	Font ft=new Font("楷体",Font.PLAIN,36);
     	g.setFont(ft);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
-		
 		XRCLine currentLine=lines.get(cur);
-		if(currentLine.start!=null&&currentLine.length!=null&&(time>currentLine.start+currentLine.length)){//不完整的歌词或最后一句
-			cur++;
-			if(cur<lines.size()){
-				currentLine=lines.get(cur);
-				isUp=!isUp;
-				now=0;
-			}else{
-				cur--;
-			}
-		}
 		if(currentLine.start==null||currentLine.length==null){
 			g.dispose();
 			return;
@@ -172,7 +184,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
         	}
         	gc.fill(shape);
         }
-        
+        int now=0;
         for(int i=currentLine.nodes.size()-1;i>=0;i--){//获取当前这句歌词到第几个字
         	XRCNode node=currentLine.nodes.get(i);
         	if(time>currentLine.start+node.start){
@@ -256,14 +268,15 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		Long allLength=(Long) properties.get("duration");
 		if(stream instanceof File){
 			File file=(File) stream;
-			String filename=file.getAbsolutePath();
-			File songWord = new File(filename.substring(0, filename
+			Config config = Config.getInstance();
+			String filename=file.getName();
+			File songWord = new File(config.lrcPath, filename.substring(0, filename
 					.lastIndexOf("."))
 					+ ".lrc");
-			File xrcWord = new File(filename.substring(0, filename
+			File xrcWord = new File(config.lrcPath, filename.substring(0, filename
 					.lastIndexOf("."))
 					+ ".zlrc");
-			File krcWord = new File(filename.substring(0, filename
+			File krcWord = new File(config.lrcPath, filename.substring(0, filename
 					.lastIndexOf("."))
 					+ ".krc");
 			List<XRCLine> lines=null;

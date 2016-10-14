@@ -266,14 +266,15 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 
 	public void loadLrc(File file) {
 		songName =file.getName().substring(0, file.getName().lastIndexOf("."));
-		String filename=file.getAbsolutePath();
-		File songWord = new File(filename.substring(0, filename
+		Config config = Config.getInstance();
+		String filename=file.getName();
+		File songWord = new File(config.lrcPath, filename.substring(0, filename
 				.lastIndexOf("."))
 				+ ".lrc");
-		File xrcWord = new File(filename.substring(0, filename
+		File xrcWord = new File(config.lrcPath, filename.substring(0, filename
 				.lastIndexOf("."))
 				+ ".zlrc");
-		File krcWord = new File(filename.substring(0, filename
+		File krcWord = new File(config.lrcPath, filename.substring(0, filename
 				.lastIndexOf("."))
 				+ ".krc");
 		if(xrcWord.exists()){

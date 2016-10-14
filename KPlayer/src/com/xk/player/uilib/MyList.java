@@ -463,7 +463,9 @@ public class MyList extends Composite {
 	}
 	
 	public void flush(){
-		back.redraw();
+		if(!isDisposed()){
+			back.redraw();
+		}
 	}
 	
 	public ListItem getFocus(){

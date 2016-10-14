@@ -30,6 +30,18 @@ public class Config {
 	public int cg=136;
 	public int cb=227;
 	
+	//桌面歌词背景色
+	public int dbr = 0x00;
+	public int dbg = 0xff;
+	public int dbb = 0x00;
+	
+	//桌面歌词进度色
+	public int dcr = 0xff;
+	public int dcg = 0x00;
+	public int dcb = 0x00;
+	
+	
+	
 	//歌词字体
 	public String fontName="楷体";
 	public int fontStyle=SWT.NORMAL;
@@ -42,6 +54,7 @@ public class Config {
 	public List<String> songList=new ArrayList<String>();
 	public List<String> favoriteList=new ArrayList<String>();
 
+	//搜索下载类型
 	public String searchType = "ape";
 	
 	@JsonIgnore
@@ -55,12 +68,13 @@ public class Config {
 				if(file.isFile()){
 					String result=FileUtils.readString(file.getAbsolutePath());
 					instance=JSONUtil.toBean(result, Config.class);
-					return instance;
 				}else{
 					file.delete();
 				}
 			}
-			instance=new Config();
+			if(null == instance) {
+				instance=new Config();
+			}
 		}
 		return instance;
 	}
