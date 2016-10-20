@@ -1,5 +1,6 @@
 package com.xk.player.tools;
 
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import org.eclipse.swt.SWT;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Config {
+public class Config implements Cloneable{
 
 	public Integer BGTYPE=0;//背景图片类型，默认
 	public String BGPATH="/images/bg1.jpg";
@@ -46,6 +47,10 @@ public class Config {
 	public String fontName="楷体";
 	public int fontStyle=SWT.NORMAL;
 	
+	//桌面歌词字体
+	public String dfontName="楷体";
+	public int dfontStyle=Font.PLAIN;
+	
 	//下载路径
 	public String downloadPath="e:/download";
 	public String lrcPath="e:/download";
@@ -57,6 +62,10 @@ public class Config {
 	//搜索下载类型
 	public String searchType = "ape";
 	
+	@JsonIgnore
+	private boolean died = false;
+	
+	//临时
 	@JsonIgnore
 	public Map<String,Map<String,String>> maps=new HashMap<String,Map<String,String>>();
 	
@@ -82,6 +91,7 @@ public class Config {
 	private Config(){
 	}
 	
+	
 	public void save(){
 		File file=new File("config.jc");
 		if(file.exists()){
@@ -95,5 +105,13 @@ public class Config {
 		}
 		String result=JSONUtil.toJson(this);
 		FileUtils.writeString(result, file);
+	}
+
+	public boolean isDied() {
+		return died;
+	}
+
+	public void setDied(boolean died) {
+		this.died = died;
 	}
 }

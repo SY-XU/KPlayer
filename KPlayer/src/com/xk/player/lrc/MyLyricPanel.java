@@ -54,6 +54,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 	private Condition drawCond;
 	private boolean paused=false;
 	private boolean drawing =false;
+	private Config config = Config.getInstance();
     
     
     public MyLyricPanel(PlayUI ui) {
@@ -143,13 +144,16 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 			g.dispose();
 			return;
 		}
+    	if(config.isDied()) {
+			config = Config.getInstance();
+		 }
     	int lastCur = cur;
     	long time=ui.getLrcOffset()+nowTime;//获取当前歌曲时间，加上前进后退值
     	cur=findCur(time);
     	if(cur != lastCur) {
     		isUp=!isUp;
     	}
-    	Font ft=new Font("楷体",Font.PLAIN,36);
+    	Font ft=new Font(config.dfontName, config.dfontStyle, 36);
     	g.setFont(ft);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);//抗锯齿
 		XRCLine currentLine=lines.get(cur);
@@ -208,7 +212,8 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
              if(off<=0){
             	 off=1;
              }
-             g.setPaint(new LinearGradientPaint(baseLeft, 0f,(isUp?50:100)+off , 0f, new float[]{0.98f, 1f}, new Color[]{Color.RED, Color.GREEN}));
+             
+             g.setPaint(new LinearGradientPaint(baseLeft, 0f,(isUp?50:100)+off , 0f, new float[]{0.98f, 1f}, new Color[]{new Color(config.dcr, config.dcg, config.dcb), new Color(config.dbr, config.dbg, config.dbb)}));
              Util.drawString(g.create(), currentLine.getWord(), baseLeft,(isUp?50:100));
         }
         if(first){
@@ -268,8 +273,10 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		Long allLength=(Long) properties.get("duration");
 		if(stream instanceof File){
 			File file=(File) stream;
-			Config config = Config.getInstance();
 			String filename=file.getName();
+			if(config.isDied()) {
+				config = Config.getInstance();
+			}
 			File songWord = new File(config.lrcPath, filename.substring(0, filename
 					.lastIndexOf("."))
 					+ ".lrc");

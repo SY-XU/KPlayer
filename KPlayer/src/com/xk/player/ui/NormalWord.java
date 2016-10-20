@@ -48,13 +48,12 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 	private PlayUI ui;
 	private boolean drawing=false;
 	private String songName ="";
-	private Config config;
+	private Config config = Config.getInstance();
 	private Long allLength;
 	
 	
 	public NormalWord(Composite parent,PlayUI ui) {
 		super(parent, SWT.DOUBLE_BUFFERED);
-		config=Config.getInstance();
 		this.ui=ui;
 		this.addPaintListener(this);
 		lock=new ReentrantLock();
@@ -145,6 +144,9 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 	}
 
 	private void drawSongName(GC g){
+		if(config.isDied()) {
+			config = Config.getInstance();
+		}
 		Font ft=SWTResourceManager.getFont( "楷体", 22,SWT.NORMAL);
 		Point songWidth=g.stringExtent(songName);
         g.setFont(ft);
@@ -168,6 +170,9 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 	
 	
 	private void drawXRC(GC g){
+		if(config.isDied()) {
+			config = Config.getInstance();
+		}
 		long timeOffset=ui.getLrcOffset();
 		long time=nowTime+timeOffset;
 		cur=findCur(time);
@@ -182,7 +187,7 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 			return;
 		}
 		float[] dashList = new float[]{255,255};
-		Font ft=SWTResourceManager.getFont( "楷体", 22,SWT.NORMAL);
+		Font ft = SWTResourceManager.getFont(config.fontName, 22, config.fontStyle);
         g.setFont(ft);
         g.setForeground(SWTResourceManager.getColor(config.br, config.bg, config.bb));
         g.setBackground(SWTResourceManager.getColor(config.br, config.bg, config.bb));
