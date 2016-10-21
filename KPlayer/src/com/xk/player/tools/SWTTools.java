@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 public class SWTTools {
 
 	public static void enableTrag(Control ctrl) {
-		Composite composite=ctrl.getShell();
+		final Composite composite=ctrl.getShell();
 		Listener listener = new Listener() {
 		    int startX, startY;
 		    public void handleEvent(Event e) {
