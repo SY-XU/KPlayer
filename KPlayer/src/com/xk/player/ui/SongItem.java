@@ -65,7 +65,7 @@ public class SongItem extends ListItem {
 
 	@Override
 	public void draw(GC gc, int start,int width,int index) {
-		String name=FileUtils.getLimitString(property.get("name"), 18);
+		String name=FileUtils.getLimitString(property.get("name"), 14);
 		Font font=SWTResourceManager.getFont("黑体", 10, SWT.NORMAL);
 		boolean hq=property.get("path").endsWith(".ape");
 		if(selected){
@@ -187,7 +187,7 @@ public class SongItem extends ListItem {
 						SWTTools.centerWindow(bbox.getShell());
 						SearchResultComp src=new SearchResultComp(bbox.getShell(), SWT.NONE);
 						src.setData(lrcs);
-						src.setPath(property.get("path"));
+						src.setPath(property.get("name"));
 						bbox.add(src);
 						bbox.open(0, 0);
 					}

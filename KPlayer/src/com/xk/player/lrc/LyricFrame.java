@@ -46,6 +46,10 @@ public class LyricFrame extends JWindow {
 	 */
 	public void hide(boolean bool) {
 		setVisible(bool);
+		if(bool) {
+			setAlwaysOnTop(bool);
+		}
+		
 	}
 	
 	/**

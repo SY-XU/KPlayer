@@ -39,7 +39,7 @@ public class MyList extends Composite {
 	protected ListItem selected=null;
 	protected int selectIndex=-1;
 	private ListItem focused=null;
-	private Canvas back;
+	protected Canvas back;
 	private boolean showScroll=false;//是否需要滚动条
 	private int barY=0;//滚动条位置
 	private int barHeight=0;//滚动条高度
@@ -463,7 +463,9 @@ public class MyList extends Composite {
 	}
 	
 	public void flush(){
-		back.redraw();
+		if(!isDisposed()){
+			back.redraw();
+		}
 	}
 	
 	public ListItem getFocus(){

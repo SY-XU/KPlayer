@@ -1,14 +1,21 @@
-package com.xk.player.uilib;
+package com.xk.player.ui.settings;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.player.tools.SWTTools;
+import com.xk.player.uilib.ICallable;
+import com.xk.player.uilib.ICallback;
+import com.xk.player.uilib.MyList;
+import com.xk.player.uilib.listeners.ItemSelectionEvent;
+import com.xk.player.uilib.listeners.ItemSelectionListener;
 
 public class SettingComp extends Composite implements ICallable{
 
@@ -36,17 +43,7 @@ public class SettingComp extends Composite implements ICallable{
 		left.setSimpleSelect(true);
 		left.setMask(55);
 		
-		
-		Image img=SWTResourceManager.getImage(getClass(), "/images/lrcsetting.png");
-		SettingItem song=new SettingItem(img, "歌词设置");
-		left.addItem(song);
-		
-		Image down=SWTResourceManager.getImage(getClass(), "/images/download.png");
-		SettingItem download=new SettingItem(down, "下载设置");
-		left.addItem(download);
-		
-		Composite content = new Composite(this, SWT.NONE);
-		content.setBounds(116, 33, 324, 247);
+		createComps();
 		
 		Label okBtn = new Label(this, SWT.NONE);
 		okBtn.setBackground(SWTResourceManager.getColor(0, 153, 255));
@@ -75,6 +72,40 @@ public class SettingComp extends Composite implements ICallable{
 				}
 			}
 		});
+		
+		left.add(new ItemSelectionListener() {
+			
+			@Override
+			public void selected(ItemSelectionEvent e) {
+				
+				
+			}
+		});
+	}
+
+	/**
+	 * 创建各个设置页面
+	 * 用途：
+	 * @date 2016年10月17日
+	 */
+	private void createComps() {
+		Image img=SWTResourceManager.getImage(getClass(), "/images/lrcsetting.png");
+		SettingItem song=new SettingItem(img, "歌词设置");
+		left.addItem(song);
+		
+		Image down=SWTResourceManager.getImage(getClass(), "/images/download.png");
+		SettingItem download=new SettingItem(down, "下载设置");
+		left.addItem(download);
+		
+		Composite content = new Composite(this, SWT.NONE);
+		content.setBounds(116, 33, 324, 247);
+		StackLayout sl = new StackLayout();
+		content.setLayout(sl);
+		
+		SettingParent lrcComp = new LrcSettingComp(content, SWT.NONE);
+		lrcComp.setSize(content.getSize());
+		sl.topControl = lrcComp;
+		
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package com.xk.player.tools;
 
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import org.eclipse.swt.SWT;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Config {
+public class Config implements Cloneable{
 
 	public Integer BGTYPE=0;//背景图片类型，默认
 	public String BGPATH="/images/bg1.jpg";
@@ -30,9 +31,25 @@ public class Config {
 	public int cg=136;
 	public int cb=227;
 	
+	//桌面歌词背景色
+	public int dbr = 0x00;
+	public int dbg = 0xff;
+	public int dbb = 0x00;
+	
+	//桌面歌词进度色
+	public int dcr = 0xff;
+	public int dcg = 0x00;
+	public int dcb = 0x00;
+	
+	
+	
 	//歌词字体
 	public String fontName="楷体";
 	public int fontStyle=SWT.NORMAL;
+	
+	//桌面歌词字体
+	public String dfontName="楷体";
+	public int dfontStyle=Font.PLAIN;
 	
 	//下载路径
 	public String downloadPath="e:/download";
@@ -42,8 +59,13 @@ public class Config {
 	public List<String> songList=new ArrayList<String>();
 	public List<String> favoriteList=new ArrayList<String>();
 
+	//搜索下载类型
 	public String searchType = "ape";
 	
+	@JsonIgnore
+	private boolean died = false;
+	
+	//临时
 	@JsonIgnore
 	public Map<String,Map<String,String>> maps=new HashMap<String,Map<String,String>>();
 	
@@ -55,18 +77,20 @@ public class Config {
 				if(file.isFile()){
 					String result=FileUtils.readString(file.getAbsolutePath());
 					instance=JSONUtil.toBean(result, Config.class);
-					return instance;
 				}else{
 					file.delete();
 				}
 			}
-			instance=new Config();
+			if(null == instance) {
+				instance=new Config();
+			}
 		}
 		return instance;
 	}
 	
 	private Config(){
 	}
+	
 	
 	public void save(){
 		File file=new File("config.jc");
@@ -81,5 +105,13 @@ public class Config {
 		}
 		String result=JSONUtil.toJson(this);
 		FileUtils.writeString(result, file);
+	}
+
+	public boolean isDied() {
+		return died;
+	}
+
+	public void setDied(boolean died) {
+		this.died = died;
 	}
 }
