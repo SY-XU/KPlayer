@@ -1,5 +1,8 @@
 package com.xk.player.ui.settings;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -10,9 +13,11 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.player.tools.Config;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.uilib.ICallable;
 import com.xk.player.uilib.ICallback;
+import com.xk.player.uilib.ListItem;
 import com.xk.player.uilib.MyList;
 import com.xk.player.uilib.listeners.ItemSelectionEvent;
 import com.xk.player.uilib.listeners.ItemSelectionListener;
@@ -21,6 +26,8 @@ public class SettingComp extends Composite implements ICallable{
 
 	private MyList left;
 	private ICallback callback;
+	private Config config;
+	private Map<ListItem, SettingParent> comps = new HashMap<ListItem, SettingParent>();
 	/**
 	 * Create the composite.
 	 * @param parent
@@ -28,6 +35,8 @@ public class SettingComp extends Composite implements ICallable{
 	 */
 	public SettingComp(Composite parent, int style) {
 		super(parent, style);
+		config = Config.getInstance().clone();
+		
 		setBackgroundMode(SWT.INHERIT_FORCE);
 		setBackgroundImage(parent.getParent().getBackgroundImage());
 		
@@ -54,6 +63,10 @@ public class SettingComp extends Composite implements ICallable{
 			@Override
 			public void mouseUp(MouseEvent arg0) {
 				if(null!=callback){
+					for(SettingParent sp : comps.values()) {
+						sp.setProperties(config);
+					}
+					Config.resetConfig(config);
 					callback.callback(null);
 				}
 			}
@@ -105,6 +118,8 @@ public class SettingComp extends Composite implements ICallable{
 		SettingParent lrcComp = new LrcSettingComp(content, SWT.NONE);
 		lrcComp.setSize(content.getSize());
 		sl.topControl = lrcComp;
+		lrcComp.loadValues(config);
+		comps.put(song, lrcComp);
 		
 	}
 

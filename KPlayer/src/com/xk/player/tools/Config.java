@@ -111,7 +111,22 @@ public class Config implements Cloneable{
 		return died;
 	}
 
-	public void setDied(boolean died) {
-		this.died = died;
+	@Override
+	public Config clone() {
+		Config o = null;
+		try {
+			o = (Config) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return o;
 	}
+	
+	public static void resetConfig(Config config) {
+		config.save();
+		instance.died=true;
+		instance = null;
+		getInstance();
+	}
+	
 }

@@ -6,6 +6,6 @@ public interface Setable {
 
 	public void setProperties(Config config);
 	
-	public void setValues(Config config);
+	public void loadValues(Config config);
 	
 }

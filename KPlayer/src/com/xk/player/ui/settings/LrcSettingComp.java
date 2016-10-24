@@ -217,6 +217,7 @@ public class LrcSettingComp extends SettingParent {
 		if(null != fDate) {
 			selector.setData(fDate);
 			name.setText(fDate.getName());
+			
 			switch(fDate.getStyle()) {
 			case SWT.NORMAL:
 				style.setText("常规");
@@ -234,13 +235,70 @@ public class LrcSettingComp extends SettingParent {
 	
 	@Override
 	public void setProperties(Config config) {
-		// TODO Auto-generated method stub
-
+		Color back = lbColor.getBackground();
+		config.br = back.getRed();
+		config.bg = back.getGreen();
+		config.bb = back.getBlue();
+		Color proce = ljColor.getBackground();
+		config.cr = proce.getRed();
+		config.cg = proce.getGreen();
+		config.cb = proce.getBlue();
+		FontData fd = (FontData) bSelector.getData();
+		config.fontName = fd.getName();
+		config.fontStyle = fd.getStyle();
+		Color backDesk = lbColorDesk.getBackground();
+		config.dbr = backDesk.getRed();
+		config.dbg = backDesk.getGreen();
+		config.dbb = backDesk.getBlue();
+		Color proceDesk = ljColorDesk.getBackground();
+		config.dcr = proceDesk.getRed();
+		config.dcg = proceDesk.getGreen();
+		config.dcb = proceDesk.getBlue();
+		FontData fdDesk = (FontData) bSelectorDesk.getData();
+		config.dfontName = fdDesk.getName();
+		config.dfontStyle = fdDesk.getStyle();
 	}
 
 	@Override
-	public void setValues(Config config) {
-		// TODO Auto-generated method stub
+	public void loadValues(Config config) {
+		Color back = new Color(null, config.br, config.bg, config.bb);
+		Color proce = new Color(null, config.cr, config.cg, config.cb);
+		lbColor.setBackground(back);
+		ljColor.setBackground(proce);
+		Font ft = new Font(null, config.fontName, 16, config.fontStyle);
+		bSelector.setData(ft.getFontData()[0]);
+		lFontName.setText(config.fontName);
+		switch(config.fontStyle) {
+		case SWT.NORMAL:
+			lFontStyle.setText("常规");
+			break;
+		case SWT.BOLD:
+			lFontStyle.setText("粗体");
+			break;
+		case SWT.ITALIC:
+			lFontStyle.setText("斜体");
+			break;
+			default:break;
+		}
+		Color backDesk = new Color(null, config.dbr, config.dbg, config.dbb);
+		lbColorDesk.setBackground(backDesk);
+		Color proceDesk = new Color(null, config.dcr, config.dcg, config.dcb);
+		ljColorDesk.setBackground(proceDesk);
+		Font fontDesk = new Font(null, config.dfontName, 16, config.dfontStyle);
+		bSelectorDesk.setData(fontDesk.getFontData()[0]);
+		lFontNameDesk.setText(config.dfontName);
+		switch(config.dfontStyle) {
+		case SWT.NORMAL:
+			lFontStyleDesk.setText("常规");
+			break;
+		case SWT.BOLD:
+			lFontStyleDesk.setText("粗体");
+			break;
+		case SWT.ITALIC:
+			lFontStyleDesk.setText("斜体");
+			break;
+			default:break;
+		}
 		
 	}
 	
