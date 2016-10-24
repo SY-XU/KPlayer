@@ -177,7 +177,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		}
         if(null!=other){//绘制下一句歌词
         	Graphics2D gc=(Graphics2D) g.create();
-        	gc.setPaint(Color.GREEN);
+        	gc.setPaint(new Color(config.dbr, config.dbg, config.dbb));
         	FontMetrics fm=gc.getFontMetrics();
         	GlyphVector gv=ft.createGlyphVector(fm.getFontRenderContext(), other.getWord());
         	Shape shape=gv.getOutline();
