@@ -8,6 +8,7 @@ package com.xk.player.core;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
 public class BasicPlayerEventLauncher extends Thread {
 
     private Set<BasicPlayerListener> listeners;//保存所有监听器的集合
-    private LinkedList<BasicPlayerEvent> queue;//一个保存所有事件的队列
+    private LinkedBlockingQueue<BasicPlayerEvent> queue;//一个保存所有事件的队列
     private boolean alive=true;
     /**
      * 默认的构造函数,只是包内友好,
@@ -28,7 +29,7 @@ public class BasicPlayerEventLauncher extends Thread {
      BasicPlayerEventLauncher() {
         super("BasicPlayerEvent Dispacther Thread");
         listeners = new HashSet<BasicPlayerListener>();
-        queue = new LinkedList<BasicPlayerEvent>();
+        queue = new LinkedBlockingQueue<BasicPlayerEvent>();
     }
 
     /**
@@ -36,7 +37,12 @@ public class BasicPlayerEventLauncher extends Thread {
      * @param event 事件
      */
     public synchronized void put(BasicPlayerEvent event) {
-        queue.offer(event);
+        try {
+			queue.put(event);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         synchronized (this) {
         	System.out.println("thank God,总算有消息了！");
             this.notifyAll();
@@ -70,7 +76,7 @@ public class BasicPlayerEventLauncher extends Thread {
     public void run() {
         while (alive) {
             try {
-				BasicPlayerEvent event = queue.poll();
+				BasicPlayerEvent event = queue.take();
 				if (event == null) {//如果事件为空,则等待
 				    synchronized (this) {
 				        try {
