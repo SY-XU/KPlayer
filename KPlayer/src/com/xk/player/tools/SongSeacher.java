@@ -28,6 +28,7 @@ package com.xk.player.tools;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,10 +139,59 @@ public class SongSeacher {
 		return lrc;
 	}
 	
+	/**
+	 * 用途：快速搜索
+	 * @date 2016年11月18日
+	 * @param name
+	 * @return
+	 */
+	public static Map<String, String> fastSearch(String name) {
+		if(StringUtil.isBlank(name)) {
+			return Collections.emptyMap();
+		}
+		try {
+			name = URLEncoder.encode(name, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String url = "http://search.kuwo.cn/r.s?SONGNAME=" + name + "&ft=music&rformat=json&encoding=utf8&rn=8&callback=song&vipver=MUSIC_8.0.3.1&_=" + System.currentTimeMillis();
+		String html=HTTPUtil.getInstance("search").getHtml(url);
+		if(StringUtil.isBlank(html)) {
+			return Collections.emptyMap();
+		}
+		html = html.replace(";song(jsondata);}catch(e){jsonError(e)}", "").replace("try {var jsondata =", "");
+		Map<String, Object> rst = JSONUtil.fromJson(html);
+		if(null == rst) {
+			return Collections.emptyMap();
+		}
+		List<Map<String, String>> list = (List<Map<String, String>>) rst.get("abslist");
+		Map<String, String> result = new HashMap<String, String>();
+		for(Map<String, String> map : list) {
+			result.put(map.get("NAME"), map.get("SONGNAME"));
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * 用途：默认歌曲搜索
+	 * @date 2016年11月18日
+	 * @param name
+	 * @return
+	 */
 	public static List<SearchInfo> getSongFromKuwo(String name){
 		return getSongFromKuwo(name, "mp3");
 	}
 	
+	
+	/**
+	 * 用途：指定类型搜索
+	 * @date 2016年11月18日
+	 * @param name
+	 * @param type
+	 * @return
+	 */
 	public static List<SearchInfo> getSongFromKuwo(String name, String type){
 		List<SearchInfo> songs=new ArrayList<SearchInfo>();
 		String searchUrl=null;

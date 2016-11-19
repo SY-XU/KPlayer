@@ -52,8 +52,8 @@ public class Config implements Cloneable{
 	public int dfontStyle=Font.PLAIN;
 	
 	//下载路径
-	public String downloadPath="e:/download";
-	public String lrcPath="e:/download";
+	public String downloadPath=System.getProperty("user.dir");
+	public String lrcPath=System.getProperty("user.dir");
 	
 	//播放列表
 	public List<String> songList=new ArrayList<String>();

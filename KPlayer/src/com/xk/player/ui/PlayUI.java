@@ -42,6 +42,7 @@ import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 import com.xk.player.ui.settings.SettingComp;
+import com.xk.player.uilib.AutoCombo;
 import com.xk.player.uilib.BaseBox;
 import com.xk.player.uilib.ColorLabel;
 import com.xk.player.uilib.Jindutiao;
@@ -546,6 +547,17 @@ public class PlayUI implements BasicPlayerListener{
 			
 		});
 		
+		AutoCombo com = new AutoCombo(text){
+
+			@Override
+			public void onSelect(String key, String value) {
+				text.setText(value);
+				processSearch();
+				
+			}
+			
+		};
+		com.init();
 		jindutiao.add(new DragListener() {
 			
 			@Override
