@@ -27,9 +27,12 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.internal.win32.OS;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+
+import com.xk.player.tools.SongSeacher;
 
 
 /**
@@ -40,6 +43,10 @@ import org.eclipse.swt.widgets.Text;
  * 时间：2015-2-2下午4:05:20
  */
 public abstract class AutoCombo{
+	//不响应文字变化
+	private boolean holding = false;
+	//不响应提示
+	private boolean sleeping = true;
 	private boolean isActive=false;
 	private boolean inited=false;
 	private Shell shell;
@@ -69,6 +76,10 @@ public abstract class AutoCombo{
 			
 			@Override
 			public void verifyText(VerifyEvent verifyevent) {
+				if(holding) {
+					return ;
+				}
+				sleeping = false;
 				String nowText = combo.getText();
 				if(verifyevent.text.isEmpty()) {
 					if(verifyevent.end - verifyevent.start == nowText.length()) {
@@ -84,17 +95,33 @@ public abstract class AutoCombo{
 				}else {
 					nowText += verifyevent.text;
 				}
-				
+				final String songName = nowText;
+				final Long time = System.currentTimeMillis();
+				System.out.println("prepare:" + songName);
 				executor.execute(new Runnable() {
 					
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
+						final Map<String, String> rst = SongSeacher.fastSearch(songName);
+						Display.getDefault().asyncExec(new Runnable() {
+							
+							@Override
+							public void run() {
+								System.out.println("result:" + songName);
+								Long last = (Long) combo.getData("time");
+								String curText = combo.getText().trim();
+								if((null == last || last < time) && !curText.isEmpty()) {
+									combo.setData("items", rst);
+									combo.setData("time", time);
+									AutoCombo.this.computeItens(songName);
+								}
+								
+							}
+						});
 						
 					}
 				});
-				System.out.println(nowText);
-				AutoCombo.this.keyReleased(nowText);
+				
 			}
 		});
 		inited=true;
@@ -146,9 +173,8 @@ public abstract class AutoCombo{
 	 *@用途：
 	 *@时间：2015-2-3下午6:06:01
 	 */
-	public void computeItens() {
+	public void computeItens(String text) {
 		items=(Map<String, String>) this.combo.getData("items");
-		String text = this.combo.getText().toLowerCase();
 		keyReleased(text);
 	}
 	private void focusLost(){
@@ -163,6 +189,9 @@ public abstract class AutoCombo{
 	}
 	
 	private void keyReleased(String text){
+		if(sleeping) {
+			return;
+		}
 		isActive=true;
 		if(!shell.isVisible()){
 			Point loc=this.combo.toDisplay(0, 0);
@@ -185,6 +214,14 @@ public abstract class AutoCombo{
 		ScrolledComposite scrolledComposite=(ScrolledComposite) list.getParent();
 		scrolledComposite.setMinSize(list.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		isActive=false;
+	}
+	
+	public void sleep() {
+		this.sleeping = true;
+	}
+	
+	public void setHolding(boolean hold) {
+		this.holding = hold;
 	}
 	
 	public abstract void onSelect(String key,String value);

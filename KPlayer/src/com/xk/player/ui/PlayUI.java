@@ -305,6 +305,7 @@ public class PlayUI implements BasicPlayerListener{
 		
 		playButton = new ColorLabel(shell, SWT.NONE,play,playfoc);
 		playButton.setBounds(155, 56, 46, 46);
+		playButton.setToolTipText("播放");
 		playButton.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -312,8 +313,10 @@ public class PlayUI implements BasicPlayerListener{
 				try {
 					if(player.getStatus()==PLAYING){
 						player.pause();
+						playButton.setToolTipText("播放");
 					}else if(player.getStatus()==PAUSED){
 						player.resume();
+						playButton.setToolTipText("暂停");
 					}else{
 						lock.lock();
 						try {
@@ -338,6 +341,7 @@ public class PlayUI implements BasicPlayerListener{
 		
 		ColorLabel nextButton = new ColorLabel(shell, SWT.NONE,next,nextfoc);
 		nextButton.setBounds(220, 60, 36, 36);
+		nextButton.setToolTipText("下一曲");
 		nextButton.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -551,7 +555,9 @@ public class PlayUI implements BasicPlayerListener{
 
 			@Override
 			public void onSelect(String key, String value) {
+				this.setHolding(true);
 				text.setText(value);
+				this.setHolding(false);
 				processSearch();
 				
 			}

@@ -3,6 +3,7 @@ package com.xk.player.tools;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,6 +18,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JSONUtil {
 	public static ObjectMapper mapper=new ObjectMapper();
 	
+	static{
+		mapper.configure(Feature.ALLOW_SINGLE_QUOTES, true) ;
+	}
 	
 	/**
 	 * 

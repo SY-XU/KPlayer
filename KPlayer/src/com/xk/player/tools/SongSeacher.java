@@ -162,7 +162,7 @@ public class SongSeacher {
 		}
 		html = html.replace(";song(jsondata);}catch(e){jsonError(e)}", "").replace("try {var jsondata =", "");
 		Map<String, Object> rst = JSONUtil.fromJson(html);
-		if(null == rst) {
+		if(null == rst || rst.isEmpty()) {
 			return Collections.emptyMap();
 		}
 		List<Map<String, String>> list = (List<Map<String, String>>) rst.get("abslist");
