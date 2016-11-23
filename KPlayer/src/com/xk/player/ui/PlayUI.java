@@ -379,7 +379,7 @@ public class PlayUI implements BasicPlayerListener{
 			public void mouseUp(MouseEvent arg0) {
 				int index=types.getSelectIndex();
 				ListItem item=list.getSelection();
-				if(index==0){
+				if(index==0 && null != item){
 					SongItem it=(SongItem) item;
 					String path=it.getProperty().get("path");
 					if(!Config.getInstance().favoriteList.contains(path)){

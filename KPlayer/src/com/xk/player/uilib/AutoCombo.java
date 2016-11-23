@@ -97,17 +97,18 @@ public abstract class AutoCombo{
 				}
 				final String songName = nowText;
 				final Long time = System.currentTimeMillis();
-				System.out.println("prepare:" + songName);
 				executor.execute(new Runnable() {
 					
 					@Override
 					public void run() {
 						final Map<String, String> rst = SongSeacher.fastSearch(songName);
+						if(null == rst || rst.isEmpty()) {
+							return;
+						}
 						Display.getDefault().asyncExec(new Runnable() {
 							
 							@Override
 							public void run() {
-								System.out.println("result:" + songName);
 								Long last = (Long) combo.getData("time");
 								String curText = combo.getText().trim();
 								if((null == last || last < time) && !curText.isEmpty()) {

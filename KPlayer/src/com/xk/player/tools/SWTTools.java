@@ -19,6 +19,7 @@ public class SWTTools {
 
 	public static void enableTrag(Control ctrl) {
 		final Composite composite=ctrl.getShell();
+		
 		Listener listener = new Listener() {
 		    int startX, startY;
 		    public void handleEvent(Event e) {
@@ -31,6 +32,7 @@ public class SWTTools {
 		            p.x -= startX;
 		            p.y -= startY;
 		            composite.setLocation(p);
+		            composite.setFocus();
 		        }
 		    }
 		};
