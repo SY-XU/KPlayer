@@ -1,5 +1,6 @@
 package com.xk.player.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -212,6 +213,22 @@ public class SongItem extends ListItem {
 						mb.open();
 					}
 					
+				}
+			});
+			
+			MenuItem mSend = new MenuItem(m, SWT.NONE);
+			mSend.setText("发送歌曲到手机");
+			mSend.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e1) {
+					File source = new File(getProperty().get("path"));
+					BaseBox bbox = new BaseBox(getParent().getShell(), SWT.NO_TRIM);
+					bbox.getShell().setSize(475,330);
+					SWTTools.centerWindow(bbox.getShell());
+					SendMusic sm = new SendMusic(bbox.getShell(), SWT.NONE);
+					sm.setSource(source);
+					bbox.add(sm);
+					bbox.open(0, 0);
 				}
 			});
 			
