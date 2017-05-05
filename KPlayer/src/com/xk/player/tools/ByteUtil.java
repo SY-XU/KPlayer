@@ -1,5 +1,8 @@
 package com.xk.player.tools;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+
 public class ByteUtil {  
 	  
     /** 
@@ -188,6 +191,16 @@ public class ByteUtil {
      */  
      private static byte charToByte(char c) {  
         return (byte) "0123456789ABCDEF".indexOf(c);  
-    } 
+     } 
   
+     public static void main(String[] args) {
+		String text = null;
+		try {
+			text = new String(hexStringToBytes("30500201000449304702010002047e2f956702033d14b9020496e503b702045852b3880425617570696d675f373066336439643233333231623332335f313438313831343932303834340201000201000400"), "GB2312");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(text);
+	}
 } 
