@@ -21,7 +21,7 @@ public abstract class LTableItem extends ListItem {
 	protected int persent=0; 
 	protected SearchInfo info;
 	private boolean head=false;
-	private Image down;
+	protected Image down;
 	
 	public LTableItem(SearchInfo info){
 		this.info=info;

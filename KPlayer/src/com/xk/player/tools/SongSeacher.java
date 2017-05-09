@@ -272,15 +272,29 @@ public class SongSeacher {
 			Document doc=Jsoup.parse(html);
 			Elements eles=doc.select("div[class=mvalbum]");
 			for(Element ele : eles) {
-				Elements uls = eles.select("ul[class=clearfix]");
+				Elements uls = ele.select("ul[class=clearfix]");
 				for(Element ul : uls) {
 					Elements lis = ul.getElementsByTag("li");
 					for(Element li : lis) {
 						SearchInfo info = new SearchInfo();
+						songs.add(info);
+						info.type= "mv";
+						info.album = "";
 						Elements as = li.select("a[class=img]");
 						for(Element a : as) {
 							info.name = a.attr("title");
-//							info.url
+							String href = a.attr("href");
+							String songId = href.replace("http://www.kuwo.cn/mv/", "").replace("/", "");
+							String mp4Url = "http://www.kuwo.cn/yy/st/mvurl?rid=MUSIC_" + songId;
+							info.url = HTTPUtil.getInstance("search").getHtml(mp4Url);
+							break;
+						}
+						Elements ps = li.select("p[class=singerName]");
+						for(Element p : ps) {
+							Elements pas = p.getElementsByTag("a");
+							for(Element pa : pas) {
+								info.singer = pa.attr("title");
+							}
 							break;
 						}
 						

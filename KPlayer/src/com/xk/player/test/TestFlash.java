@@ -6,6 +6,8 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -47,8 +49,16 @@ public class TestFlash {
 		shell = new Shell();
 		shell.setSize(966, 575);
 		shell.setText("Flash");
-		shell.setLayout(new FillLayout());
-		Flash flash = new Flash(shell, SWT.NO_BACKGROUND, new FlashEventListener() {
+		
+		StackLayout layout = new StackLayout();
+//		shell.setLayout(new FillLayout());
+		shell.setLayout(layout);
+		StackLayout layout1 = new StackLayout();
+		
+		Composite comp = new Composite(shell, SWT.EMBEDDED|SWT.BORDER);
+		comp.setLayout(layout1);
+		layout.topControl = comp;
+		Flash flash = new Flash(comp, SWT.NO_BACKGROUND, new FlashEventListener() {
 			
 			@Override
 			public void onReadyStateChange(int newState) {
@@ -68,6 +78,7 @@ public class TestFlash {
 				
 			}
 		});
+		layout1.topControl = flash.getOleFrame();
 		String hash = "869270221B2FEDCDF5BB75016C692AF3";
 		String md5 = ByteUtil.MD5(hash + "kugoumvcloud");
 		String url = "http://trackermv.kugou.com/interface/index/cmd=100&hash=" + hash + "&key=" + md5 + "&pid=6&ext=mp4&ismp3=0";
@@ -79,7 +90,7 @@ public class TestFlash {
 		vars.put("autoplay", "true");
 		vars.put("fullscreen", "true");
 		vars.put("initfun", "flashinit");
-		vars.put("url", "http://win.web.ri03.sycdn.kuwo.cn/95272d00feef5cc4652d007e77103bb8/591027f6/resource/m3/64/75/3386025314.mp4");//(String)((Map<String , Map<String, Object>>)map.get("mvdata")).get("sd").get("downurl"));
+		vars.put("url", (String)((Map<String , Map<String, Object>>)map.get("mvdata")).get("sd").get("downurl"));
 		String varsStr = "";
 		for(String key : vars.keySet()) {
 			varsStr += key + "=" + vars.get(key) + "&";

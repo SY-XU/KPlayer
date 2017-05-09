@@ -22,6 +22,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -33,10 +35,15 @@ import com.xk.player.core.BasicPlayerEvent;
 import com.xk.player.core.BasicPlayerException;
 import com.xk.player.core.BasicPlayerListener;
 import com.xk.player.lrc.LyricFrame;
+import com.xk.player.ole.flash.Flash;
+import com.xk.player.tools.ByteUtil;
 import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.JSONUtil;
+
 import org.eclipse.wb.swt.SWTResourceManager;
+
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SongSeacher;
@@ -58,6 +65,8 @@ import com.xk.player.uilib.listeners.ItemSelectionEvent;
 import com.xk.player.uilib.listeners.ItemSelectionListener;
 
 import org.eclipse.swt.widgets.Label;
+import org.jsoup.helper.StringUtil;
+
 import static com.xk.player.core.BasicPlayerEvent.*;
 
 public class PlayUI implements BasicPlayerListener{
@@ -84,8 +93,11 @@ public class PlayUI implements BasicPlayerListener{
 	private MyText text;
 	private LyricFrame lFrame;
 	private NormalWord lrcWord;
+	private Composite flashComp;
+	private Flash flash;
 	private ColorLabel lrcword;
 	private ColorLabel searchword;
+	private ColorLabel mvword;
 	
 	private int lrcModel=-1;//是否显示悬浮歌词
 	
@@ -493,7 +505,7 @@ public class PlayUI implements BasicPlayerListener{
 		lrcword.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent arg0) {
-				showLrcView(true);
+				showLrcView(1);
 			}
 		});
 		
@@ -504,12 +516,24 @@ public class PlayUI implements BasicPlayerListener{
 		searchword.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent arg0) {
-				showLrcView(false);
+				showLrcView(2);
 			}
 		});
 		
+		mvword = new ColorLabel(shell, SWT.NONE, searchpic, searchnor);
+		mvword.setBounds(745, 80, 70, 40);
+		
+		mvword.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent arg0) {
+				showLrcView(3);
+			}
+		});
+		
+		
 		lrcWord = new NormalWord(shell, this);
 		lrcWord.setBounds(470, 140, 455, 450);
+		lrcWord.setVisible(false);
 		
 		searchResult=new MyList(shell, 455, 450);
 		searchResult.setBounds(470, 140, 455, 450);
@@ -524,6 +548,34 @@ public class PlayUI implements BasicPlayerListener{
 		it.setHead(true);
 		searchResult.addItem(it);
 		
+		
+		flashComp = new Composite(shell, SWT.EMBEDDED|SWT.BORDER);
+		flashComp.setBounds(470, 140, 455, 450);
+		flashComp.setLayout(new FillLayout());
+		flashComp.setVisible(true);
+		
+		flash = new Flash(flashComp, SWT.BORDER);
+		String hash = "869270221B2FEDCDF5BB75016C692AF3";
+		String md5 = ByteUtil.MD5(hash + "kugoumvcloud");
+		String url = "http://trackermv.kugou.com/interface/index/cmd=100&hash=" + hash + "&key=" + md5 + "&pid=6&ext=mp4&ismp3=0";
+		String rst = HTTPUtil.getInstance("test").getHtml(url);
+		Map<String, Object> map = JSONUtil.fromJson(rst);
+		Map<String, String> vars = new HashMap<String, String>();
+		vars.put("skinurl", "http://static.kgimg.com/common/swf/video/skin.swf");
+		vars.put("aspect", "true");
+		vars.put("autoplay", "true");
+		vars.put("fullscreen", "true");
+		vars.put("initfun", "flashinit");
+		vars.put("url", (String)((Map<String , Map<String, Object>>)map.get("mvdata")).get("sd").get("downurl"));
+		String varsStr = "";
+		for(String key : vars.keySet()) {
+			varsStr += key + "=" + vars.get(key) + "&";
+		}
+		flash.setFlashVars(varsStr);
+		flash.setQuality2("high");
+		flash.setBGColor("#666666");
+		flash.setWMode("Transparent");
+		flash.loadMovie(0, "http://static.kgimg.com/common/swf/video/videoPlayer.swf?20141014061415");
 		
 		Image search=SWTResourceManager.getImage(PlayUI.class, "/images/search.png");
 		
@@ -628,24 +680,62 @@ public class PlayUI implements BasicPlayerListener{
 		createPlayer();
 	}
 	
-	private void showLrcView(boolean show){
+	/**
+	 * 歌词和搜索切换
+	 * @param show
+	 * @author o-kui.xiao
+	 */
+	private void showLrcView(int num){
 		Image lrcpic=SWTResourceManager.getImage(PlayUI.class, "/images/lrcpic.png");
 		Image lrcnor=SWTResourceManager.getImage(PlayUI.class, "/images/lrcnor.png");
 		Image searchpic=SWTResourceManager.getImage(PlayUI.class, "/images/searchpic.png");
 		Image searchnor=SWTResourceManager.getImage(PlayUI.class, "/images/searchnor.png");
-		lrcWord.setVisible(show);
-		searchResult.setVisible(!show);
-		lrcword.setInner(show?lrcpic:lrcnor);
-		searchword.setInner(show?searchpic:searchnor);
+		if(num != 3) {
+			if(flash.isPlaying()) {
+				flash.stop();
+			}
+		}
+		lrcWord.setVisible(1 == num);
+		searchResult.setVisible(2 == num);
+		flashComp.setVisible(3 == num);
+		lrcword.setInner(1 == num ? lrcpic : lrcnor);
+		searchword.setInner(2 == num ? searchpic : searchnor);
+		mvword.setInner(3 == num ? searchpic : searchnor);
 		lrcword.redraw();
 		searchword.redraw();
+		mvword.redraw();
 	}
 	
+	public void playMv(String url) {
+		showLrcView(3);
+		Map<String, String> vars = new HashMap<String, String>();
+		vars.put("skinurl", "http://static.kgimg.com/common/swf/video/skin.swf");
+		vars.put("aspect", "true");
+		vars.put("autoplay", "true");
+		vars.put("fullscreen", "true");
+		vars.put("initfun", "flashinit");
+		vars.put("url", url);
+		String varsStr = "";
+		for(String key : vars.keySet()) {
+			varsStr += key + "=" + vars.get(key) + "&";
+		}
+		flash.setFlashVars(varsStr);
+		flash.setQuality2("high");
+		flash.setBGColor("#666666");
+		flash.setWMode("Transparent");
+		flash.loadMovie(0, "http://static.kgimg.com/common/swf/video/videoPlayer.swf?20141014061415");
+	}
+	
+	/**
+	 * 搜索
+	 * 
+	 * @author o-kui.xiao
+	 */
 	private void processSearch(){
 		String name=text.getText();
 		if(!name.isEmpty()){
-			showLrcView(false);
-			List<SearchInfo> result=SongSeacher.getSongFromKuwo(name, Config.getInstance().searchType);
+			showLrcView(2);
+			List<SearchInfo> result=SongSeacher.getMVFromKuwo(name);//.getSongFromKuwo(name, Config.getInstance().searchType);
 			SearchInfo head=new SearchInfo();
 			head.album="专辑";
 			head.name="歌名";
@@ -653,17 +743,22 @@ public class PlayUI implements BasicPlayerListener{
 			result.add(0, head);
 			searchResult.clearAll();
 			for(int i=0;i<result.size();i++){
-				LTableItem item=new SongSearchItem(result.get(i));
+				LTableItem item=new MVSearchItem(result.get(i));
 				if(i==0){
 					item.setHead(true);
 				}
 				searchResult.addItem(item);
-				searchResult.flush();
 			}
+			searchResult.flush();
 		}
 	}
 	
 	
+	/**
+	 * 双击播放
+	 * @param ev
+	 * @author o-kui.xiao
+	 */
 	private void processItemSelection(ItemSelectionEvent ev) {
 		currentPlay=types.getSelectIndex();
 		final SongItem item=(SongItem) ev.item;
@@ -687,26 +782,26 @@ public class PlayUI implements BasicPlayerListener{
 			public void run() {
 				String name=item.getProperty().get("artist");
 				System.out.println("name:"+name);
-				if(null!=name&&!name.isEmpty()){
-					String path=SongSeacher.getArtistFromKuwo(name);
-					System.out.println("path:"+path);
-					if(null!=path&&!path.isEmpty()){
-						SongLocation loc=HTTPUtil.getInstance("player").getInputStream(path);
-						if(null!=loc){
-							ImageData[] img=new ImageLoader().load(loc.input);
-							if(null!=img&&img.length>0){
-								item.setHead(SWTTools.scaleImage(img[0], 50, 50));
-								Display.getDefault().asyncExec(new Runnable() {
-									public void run() {
-										item.getParent().flush();
-									}
-								});
-							}
+				if(StringUtil.isBlank(name)){
+					return;
+				}
+				String path=SongSeacher.getArtistFromKuwo(name);
+				System.out.println("path:"+path);
+				if(StringUtil.isBlank(path)){
+					return;
+				}
+				SongLocation loc=HTTPUtil.getInstance("player").getInputStream(path);
+				if(null == loc){
+					return;
+				}
+				ImageData[] img=new ImageLoader().load(loc.input);
+				if(null!=img&&img.length>0){
+					item.setHead(SWTTools.scaleImage(img[0], 50, 50));
+					Display.getDefault().asyncExec(new Runnable() {
+						public void run() {
+							item.getParent().flush();
 						}
-						
-					}
-					
-					
+					});
 				}
 				
 				
@@ -715,6 +810,11 @@ public class PlayUI implements BasicPlayerListener{
 		
 	}
 	
+	/**
+	 * 删除文件
+	 * @param path
+	 * @author o-kui.xiao
+	 */
 	private void removeFile(String path){
 		int tps=types.getSelectIndex();
 		if(tps==0){
@@ -724,6 +824,12 @@ public class PlayUI implements BasicPlayerListener{
 		}
 	}
 	
+	/**
+	 * 添加单个文件
+	 * @param path
+	 * @param sync
+	 * @author o-kui.xiao
+	 */
 	public void addFile(String path,boolean sync){
 		int tps=types.getSelectIndex();
 		if(tps==0){
@@ -798,6 +904,11 @@ public class PlayUI implements BasicPlayerListener{
 		}
 	}
 
+	/**
+	 * 循环播放
+	 * 
+	 * @author o-kui.xiao
+	 */
 	private void loop(){
 		new Thread(new Runnable() {
 			
@@ -811,6 +922,11 @@ public class PlayUI implements BasicPlayerListener{
 		}).start();
 	}
 	
+	/**
+	 * 下一曲
+	 * 
+	 * @author o-kui.xiao
+	 */
 	private void playNext(){
 		if(currentPlay!=types.getSelectIndex()){
 			types.select(currentPlay, true);
@@ -828,6 +944,11 @@ public class PlayUI implements BasicPlayerListener{
 		list.select(now,true);
 	}
 	
+	/**
+	 * 播放
+	 * 
+	 * @author o-kui.xiao
+	 */
 	private void playMusic(){
 		lock.lock();
 		try {
@@ -869,6 +990,11 @@ public class PlayUI implements BasicPlayerListener{
 		
 	}
 	
+	/**
+	 * 拖拽回调
+	 * @param rate
+	 * @author o-kui.xiao
+	 */
 	protected void processSeek(double rate) {
         try {
             if ((audioInfo != null) && (audioInfo.containsKey("audio.type"))) {
@@ -889,6 +1015,11 @@ public class PlayUI implements BasicPlayerListener{
         }
     }
 	
+	/**
+	 * 创建播放器
+	 * 
+	 * @author o-kui.xiao
+	 */
 	private void createPlayer(){
 		player=new BasicPlayer();
 		player.addBasicPlayerListener(this);
@@ -930,6 +1061,9 @@ public class PlayUI implements BasicPlayerListener{
 		});
 	}
 
+	/**
+	 * 进度回调
+	 */
 	@Override
 	public void progress(int bytesread, long microseconds, byte[] pcmdata, Map<String,Object> properties) {
 		final long realTime=jumpedMillan+microseconds/1000;
@@ -953,6 +1087,10 @@ public class PlayUI implements BasicPlayerListener{
 		
 	}
 
+	
+	/**
+	 * 状态回调
+	 */
 	@Override
 	public void stateUpdated(BasicPlayerEvent event) {
 		if(event.getCode()==EOM){
@@ -1003,6 +1141,13 @@ public class PlayUI implements BasicPlayerListener{
 	public void setController(BasicController controller) {
 	}
 	
+	
+	/**
+	 * 转化时间
+	 * @param time
+	 * @return
+	 * @author o-kui.xiao
+	 */
 	private String long2Seconds(long time){
 		long sec=time/1000;
 		int m=(int) (sec/60);
