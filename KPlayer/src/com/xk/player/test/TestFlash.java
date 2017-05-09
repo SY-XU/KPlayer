@@ -1,5 +1,8 @@
 package com.xk.player.test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FillLayout;
@@ -8,6 +11,9 @@ import org.eclipse.swt.widgets.Shell;
 
 import com.xk.player.ole.flash.Flash;
 import com.xk.player.ole.flash.listener.FlashEventListener;
+import com.xk.player.tools.ByteUtil;
+import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.JSONUtil;
 
 public class TestFlash {
 	
@@ -40,13 +46,13 @@ public class TestFlash {
 	protected void createContents() {
 		shell = new Shell();
 		shell.setSize(966, 575);
-		shell.setText("Docment");
+		shell.setText("Flash");
 		shell.setLayout(new FillLayout());
 		Flash flash = new Flash(shell, SWT.NO_BACKGROUND, new FlashEventListener() {
 			
 			@Override
 			public void onReadyStateChange(int newState) {
-				System.out.println("newState" + newState);
+//				System.out.println("newState" + newState);
 				
 			}
 			
@@ -62,8 +68,26 @@ public class TestFlash {
 				
 			}
 		});
-		flash.setBackgroundColor(SWT.COLOR_BLACK);
-		flash.loadMovie(0, "https://p.bokecc.com/flash/player.swf?vid=B94C8EEBA792AB1B9C33DC5901307461&siteid=2745FC107AA7B1F3&playerid=1245942C135EBBD6&playertype=1&autoStart=true");
-		flash.setMenuEnable(false);
+		String hash = "869270221B2FEDCDF5BB75016C692AF3";
+		String md5 = ByteUtil.MD5(hash + "kugoumvcloud");
+		String url = "http://trackermv.kugou.com/interface/index/cmd=100&hash=" + hash + "&key=" + md5 + "&pid=6&ext=mp4&ismp3=0";
+		String rst = HTTPUtil.getInstance("test").getHtml(url);
+		Map<String, Object> map = JSONUtil.fromJson(rst);
+		Map<String, String> vars = new HashMap<String, String>();
+		vars.put("skinurl", "http://static.kgimg.com/common/swf/video/skin.swf");
+		vars.put("aspect", "true");
+		vars.put("autoplay", "true");
+		vars.put("fullscreen", "true");
+		vars.put("initfun", "flashinit");
+		vars.put("url", "http://win.web.ri03.sycdn.kuwo.cn/95272d00feef5cc4652d007e77103bb8/591027f6/resource/m3/64/75/3386025314.mp4");//(String)((Map<String , Map<String, Object>>)map.get("mvdata")).get("sd").get("downurl"));
+		String varsStr = "";
+		for(String key : vars.keySet()) {
+			varsStr += key + "=" + vars.get(key) + "&";
+		}
+		flash.setFlashVars(varsStr);
+		flash.setQuality2("high");
+		flash.setBGColor("#666666");
+		flash.setWMode("Transparent");
+		flash.loadMovie(0, "http://static.kgimg.com/common/swf/video/videoPlayer.swf?20141014061415");
 	}
 }
