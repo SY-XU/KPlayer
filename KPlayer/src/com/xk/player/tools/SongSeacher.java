@@ -186,7 +186,7 @@ public class SongSeacher {
 	
 	
 	/**
-	 * 用途：指定类型搜索
+	 * 用途：指定类型搜索音乐
 	 * @date 2016年11月18日
 	 * @param name
 	 * @param type
@@ -252,6 +252,44 @@ public class SongSeacher {
 		}
 		
 		return songs;
+	}
+	
+	/**
+	 * 酷我搜索mv
+	 * @param name
+	 * @return
+	 */
+	public static List<SearchInfo> getMVFromKuwo(String name) {
+		List<SearchInfo> songs=new ArrayList<SearchInfo>();
+		String searchUrl=null;
+		try {
+			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=mv&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
+		} catch (UnsupportedEncodingException e) {
+			return songs;
+		}
+		String html=HTTPUtil.getInstance("search").getHtml(searchUrl);
+		if(!StringUtil.isBlank(html)){
+			Document doc=Jsoup.parse(html);
+			Elements eles=doc.select("div[class=mvalbum]");
+			for(Element ele : eles) {
+				Elements uls = eles.select("ul[class=clearfix]");
+				for(Element ul : uls) {
+					Elements lis = ul.getElementsByTag("li");
+					for(Element li : lis) {
+						SearchInfo info = new SearchInfo();
+						Elements as = li.select("a[class=img]");
+						for(Element a : as) {
+							info.name = a.attr("title");
+//							info.url
+							break;
+						}
+						
+					}
+				}
+			}
+		}
+		return songs;
+		
 	}
 	
 	

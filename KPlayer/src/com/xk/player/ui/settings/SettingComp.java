@@ -90,8 +90,10 @@ public class SettingComp extends Composite implements ICallable{
 			
 			@Override
 			public void selected(ItemSelectionEvent e) {
-				
-				
+				ListItem itm = e.item;
+				SettingParent sp = comps.get(itm);
+				StackLayout sl = (StackLayout) sp.getParent().getLayout();
+				sl.topControl = sp;
 			}
 		});
 	}
@@ -120,6 +122,8 @@ public class SettingComp extends Composite implements ICallable{
 		sl.topControl = lrcComp;
 		lrcComp.loadValues(config);
 		comps.put(song, lrcComp);
+		
+		
 		
 	}
 
