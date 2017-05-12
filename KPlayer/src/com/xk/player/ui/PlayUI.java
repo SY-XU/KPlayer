@@ -93,7 +93,6 @@ public class PlayUI implements BasicPlayerListener{
 	private MyText text;
 	private LyricFrame lFrame;
 	private NormalWord lrcWord;
-	private Composite flashComp;
 	private Flash flash;
 	private ColorLabel lrcword;
 	private ColorLabel searchword;
@@ -533,7 +532,7 @@ public class PlayUI implements BasicPlayerListener{
 		
 		lrcWord = new NormalWord(shell, this);
 		lrcWord.setBounds(470, 140, 455, 450);
-		lrcWord.setVisible(false);
+		lrcWord.setVisible(true);
 		
 		searchResult=new MyList(shell, 455, 450);
 		searchResult.setBounds(470, 140, 455, 450);
@@ -549,33 +548,12 @@ public class PlayUI implements BasicPlayerListener{
 		searchResult.addItem(it);
 		
 		
-		flashComp = new Composite(shell, SWT.EMBEDDED|SWT.BORDER);
-		flashComp.setBounds(470, 140, 455, 450);
-		flashComp.setLayout(new FillLayout());
-		flashComp.setVisible(true);
 		
-		flash = new Flash(flashComp, SWT.BORDER);
-		String hash = "869270221B2FEDCDF5BB75016C692AF3";
-		String md5 = ByteUtil.MD5(hash + "kugoumvcloud");
-		String url = "http://trackermv.kugou.com/interface/index/cmd=100&hash=" + hash + "&key=" + md5 + "&pid=6&ext=mp4&ismp3=0";
-		String rst = HTTPUtil.getInstance("test").getHtml(url);
-		Map<String, Object> map = JSONUtil.fromJson(rst);
-		Map<String, String> vars = new HashMap<String, String>();
-		vars.put("skinurl", "http://static.kgimg.com/common/swf/video/skin.swf");
-		vars.put("aspect", "true");
-		vars.put("autoplay", "true");
-		vars.put("fullscreen", "true");
-		vars.put("initfun", "flashinit");
-		vars.put("url", (String)((Map<String , Map<String, Object>>)map.get("mvdata")).get("sd").get("downurl"));
-		String varsStr = "";
-		for(String key : vars.keySet()) {
-			varsStr += key + "=" + vars.get(key) + "&";
-		}
-		flash.setFlashVars(varsStr);
-		flash.setQuality2("high");
+		flash = new Flash(shell, SWT.NONE);
+		flash.setEmbedMovie(false);
+		flash.getControl().setBounds(470, 140, 455, 450);
 		flash.setBGColor("#666666");
-		flash.setWMode("Transparent");
-		flash.loadMovie(0, "http://static.kgimg.com/common/swf/video/videoPlayer.swf?20141014061415");
+		flash.getControl().setVisible(false);
 		
 		Image search=SWTResourceManager.getImage(PlayUI.class, "/images/search.png");
 		
@@ -691,13 +669,24 @@ public class PlayUI implements BasicPlayerListener{
 		Image searchpic=SWTResourceManager.getImage(PlayUI.class, "/images/searchpic.png");
 		Image searchnor=SWTResourceManager.getImage(PlayUI.class, "/images/searchnor.png");
 		if(num != 3) {
-			if(flash.isPlaying()) {
-				flash.stop();
+			if(null != flash ) {
+				System.out.println("closing");
+				flash.getControl().setVisible(false);
+				flash.stopPlay();
+				flash.setMovie("");
+				flash.dispose();
+				flash = null;
 			}
+		}else {
+			System.out.println("init");
+			flash = new Flash(shell, SWT.NONE);
+			flash.getControl().setBounds(470, 140, 455, 450);
+			flash.setBGColor("#666666");
+			flash.getControl().setVisible(true);
 		}
+		
 		lrcWord.setVisible(1 == num);
 		searchResult.setVisible(2 == num);
-		flashComp.setVisible(3 == num);
 		lrcword.setInner(1 == num ? lrcpic : lrcnor);
 		searchword.setInner(2 == num ? searchpic : searchnor);
 		mvword.setInner(3 == num ? searchpic : searchnor);
@@ -735,7 +724,7 @@ public class PlayUI implements BasicPlayerListener{
 		String name=text.getText();
 		if(!name.isEmpty()){
 			showLrcView(2);
-			List<SearchInfo> result=SongSeacher.getMVFromKuwo(name);//.getSongFromKuwo(name, Config.getInstance().searchType);
+			List<SearchInfo> result=SongSeacher.getMVFromKugou(name);//.getSongFromKuwo(name, Config.getInstance().searchType);
 			SearchInfo head=new SearchInfo();
 			head.album="专辑";
 			head.name="歌名";

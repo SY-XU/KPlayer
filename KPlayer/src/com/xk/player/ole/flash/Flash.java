@@ -312,6 +312,7 @@ public class Flash extends OleContainer
 		if ( activated )
 		{
 			oleControlSite.deactivateInPlaceClient( );
+			oleControlSite.dispose();
 			activated = false;
 		}
 

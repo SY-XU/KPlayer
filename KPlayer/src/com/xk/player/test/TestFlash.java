@@ -53,12 +53,12 @@ public class TestFlash {
 		StackLayout layout = new StackLayout();
 //		shell.setLayout(new FillLayout());
 		shell.setLayout(layout);
-		StackLayout layout1 = new StackLayout();
+//		StackLayout layout1 = new StackLayout();
 		
-		Composite comp = new Composite(shell, SWT.EMBEDDED|SWT.BORDER);
-		comp.setLayout(layout1);
+		Composite comp = new Composite(shell, SWT.EMBEDDED);
+//		comp.setLayout(new FillLayout());
 		layout.topControl = comp;
-		Flash flash = new Flash(comp, SWT.NO_BACKGROUND, new FlashEventListener() {
+		Flash flash = new Flash(comp, SWT.BORDER, new FlashEventListener() {
 			
 			@Override
 			public void onReadyStateChange(int newState) {
@@ -78,7 +78,7 @@ public class TestFlash {
 				
 			}
 		});
-		layout1.topControl = flash.getOleFrame();
+		flash.getControl().setBounds(0, 0, 964, 573);
 		String hash = "869270221B2FEDCDF5BB75016C692AF3";
 		String md5 = ByteUtil.MD5(hash + "kugoumvcloud");
 		String url = "http://trackermv.kugou.com/interface/index/cmd=100&hash=" + hash + "&key=" + md5 + "&pid=6&ext=mp4&ismp3=0";

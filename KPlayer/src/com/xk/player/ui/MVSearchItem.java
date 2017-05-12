@@ -11,7 +11,7 @@ public class MVSearchItem extends LTableItem {
 	@Override
 	protected void download() {
 		PlayUI ui = PlayUI.getInstance();
-		ui.playMv(info.url);
+		ui.playMv(info.getUrl());
 	}
 
 }

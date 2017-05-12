@@ -254,6 +254,65 @@ public class SongSeacher {
 		return songs;
 	}
 	
+	
+	public static List<SearchInfo> getMVFromKugou(String name) {
+		List<SearchInfo> songs = new ArrayList<SearchInfo>();
+		String searchUrl = null;
+		String html = null;
+		String callBack = "jQuery19108035724928824395_" + System.currentTimeMillis();
+		try {
+			searchUrl = "http://mvsearch.kugou.com/mv_search";
+			Map<String, String> params = new HashMap<String, String>();
+			params.put("callback", callBack);
+			params.put("keyword", name);
+			params.put("page", "1");
+			params.put("pagesize", "30");
+			params.put("userid", "-1");
+			params.put("clientver", "");
+			params.put("platform", "WebFilter");
+			params.put("tag", "em");
+			params.put("filter", "2");
+			params.put("iscorrection", "1");
+			params.put("privilege_filter", "0");
+			params.put("_", String.valueOf(System.currentTimeMillis()));
+			html = HTTPUtil.getInstance("search").getHtml(searchUrl, params);
+		} catch (Exception e) {
+			return songs;
+		}
+		if(!StringUtil.isBlank(html)){
+			String json = html.substring(callBack.length() + 1, html.length() - 1 );
+			Map<String, Object> rst = JSONUtil.fromJson(json);
+			Map<String, Object> data = (Map<String, Object>) rst.get("data");
+			List<Map<String, Object>> lists = (List<Map<String, Object>>) data.get("lists");
+			for(Map<String, Object> minfo : lists) {
+				SearchInfo info = new SearchInfo(){
+
+					@Override
+					public String getUrl() {
+						if(this.urlFound) {
+							return url;
+						}
+						String md5 = ByteUtil.MD5(this.url + "kugoumvcloud");
+						String url = "http://trackermv.kugou.com/interface/index/cmd=100&hash=" + this.url + "&key=" + md5 + "&pid=6&ext=mp4&ismp3=0";
+						String rst = HTTPUtil.getInstance("test").getHtml(url);
+						Map<String, Object> map = JSONUtil.fromJson(rst);
+						this.urlFound = true;
+						this.url = (String)((Map<String , Map<String, Object>>)map.get("mvdata")).get("sd").get("downurl");
+						return this.url;
+					}
+					
+				};
+				songs.add(info);
+				info.type= "mv";
+				info.album = "";
+				info.singer = (String) minfo.get("SingerName");
+				info.url = (String) minfo.get("MvHash");
+				info.name = ((String) minfo.get("MvName")).replace("<em>", "").replace("</em>", "");
+			}
+		}
+		return songs;
+	}
+	
 	/**
 	 * 酷我搜索mv
 	 * @param name
@@ -276,7 +335,21 @@ public class SongSeacher {
 				for(Element ul : uls) {
 					Elements lis = ul.getElementsByTag("li");
 					for(Element li : lis) {
-						SearchInfo info = new SearchInfo();
+						SearchInfo info = new SearchInfo(){
+
+							@Override
+							public String getUrl() {
+								if(this.urlFound) {
+									return this.url;
+								}
+								String mp4Url = "http://www.kuwo.cn/yy/st/mvurl?rid=MUSIC_" + this.url;
+								this.urlFound = true;
+								this.url = HTTPUtil.getInstance("search").getHtml(mp4Url);
+								return this.url;
+							}
+							
+						};
+						
 						songs.add(info);
 						info.type= "mv";
 						info.album = "";
@@ -285,8 +358,7 @@ public class SongSeacher {
 							info.name = a.attr("title");
 							String href = a.attr("href");
 							String songId = href.replace("http://www.kuwo.cn/mv/", "").replace("/", "");
-							String mp4Url = "http://www.kuwo.cn/yy/st/mvurl?rid=MUSIC_" + songId;
-							info.url = HTTPUtil.getInstance("search").getHtml(mp4Url);
+							info.url = songId;
 							break;
 						}
 						Elements ps = li.select("p[class=singerName]");
@@ -305,14 +377,20 @@ public class SongSeacher {
 		return songs;
 		
 	}
-	
+	public static void main(String[] args) {
+		getMVFromKugou("凉凉");
+	}
 	
 	public static class SearchInfo{
+		boolean urlFound = false;
 		public String url="";
 		public String name="";
 		public String singer="";
 		public String album="";
 		public String type = "mp3";
+		public String getUrl() {
+			return url;
+		}
 	}
 	
 }
