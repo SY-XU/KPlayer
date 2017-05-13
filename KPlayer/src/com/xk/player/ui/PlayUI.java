@@ -522,7 +522,10 @@ public class PlayUI implements BasicPlayerListener{
 			}
 		});
 		
-		mvword = new ColorLabel(shell, SWT.NONE, searchpic, searchnor);
+		Image mvpic=SWTResourceManager.getImage(PlayUI.class, "/images/mvpic.png");
+		Image mvnor=SWTResourceManager.getImage(PlayUI.class, "/images/mvnor.png");
+		
+		mvword = new ColorLabel(shell, SWT.NONE, mvnor, mvpic);
 		mvword.setBounds(745, 80, 70, 40);
 		
 		mvword.addMouseListener(new MouseAdapter() {
@@ -680,6 +683,9 @@ public class PlayUI implements BasicPlayerListener{
 		Image lrcnor=SWTResourceManager.getImage(PlayUI.class, "/images/lrcnor.png");
 		Image searchpic=SWTResourceManager.getImage(PlayUI.class, "/images/searchpic.png");
 		Image searchnor=SWTResourceManager.getImage(PlayUI.class, "/images/searchnor.png");
+		Image mvpic=SWTResourceManager.getImage(PlayUI.class, "/images/mvpic.png");
+		Image mvnor=SWTResourceManager.getImage(PlayUI.class, "/images/mvnor.png");
+		
 		if(num != 3) {
 			if(null != flash ) {
 				System.out.println("closing");
@@ -701,7 +707,7 @@ public class PlayUI implements BasicPlayerListener{
 		searchResult.setVisible(2 == num);
 		lrcword.setInner(1 == num ? lrcpic : lrcnor);
 		searchword.setInner(2 == num ? searchpic : searchnor);
-		mvword.setInner(3 == num ? searchpic : searchnor);
+		mvword.setInner(3 == num ? mvpic : mvnor);
 		lrcword.redraw();
 		searchword.redraw();
 		mvword.redraw();
