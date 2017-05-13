@@ -23,6 +23,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
@@ -91,6 +92,8 @@ public class PlayUI implements BasicPlayerListener{
 	private Label songName;
 	private long timeNow=0;
 	private MyText text;
+	private Button searchMusic;
+	private Button searchMV;
 	private LyricFrame lFrame;
 	private NormalWord lrcWord;
 	private Flash flash;
@@ -581,6 +584,15 @@ public class PlayUI implements BasicPlayerListener{
 			
 		});
 		
+		searchMusic = new Button(shell, SWT.RADIO);
+		searchMusic.setBounds(780, 10, 54, 35);
+		searchMusic.setText("歌曲");
+		searchMusic.setSelection(true);
+		
+		searchMV = new Button(shell, SWT.RADIO);
+		searchMV.setBounds(835, 10, 50, 35);
+		searchMV.setText("MV");
+		
 		AutoCombo com = new AutoCombo(text){
 
 			@Override
@@ -724,7 +736,15 @@ public class PlayUI implements BasicPlayerListener{
 		String name=text.getText();
 		if(!name.isEmpty()){
 			showLrcView(2);
-			List<SearchInfo> result=SongSeacher.getMVFromKugou(name);//.getSongFromKuwo(name, Config.getInstance().searchType);
+			List<SearchInfo> result = null;
+			if(searchMusic.getSelection()) {
+				result = SongSeacher.getSongFromKuwo(name, Config.getInstance().searchType);
+			} else if(searchMV.getSelection()) {
+				result = SongSeacher.getMVFromKugou(name);
+			} else {
+				return;
+			}
+			//.getSongFromKuwo(name, Config.getInstance().searchType);
 			SearchInfo head=new SearchInfo();
 			head.album="专辑";
 			head.name="歌名";
