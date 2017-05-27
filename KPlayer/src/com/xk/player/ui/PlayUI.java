@@ -13,6 +13,7 @@ import org.cmc.music.metadata.MusicMetadata;
 import org.cmc.music.metadata.MusicMetadataSet;
 import org.cmc.music.myid3.MyID3;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -58,6 +59,7 @@ import com.xk.player.uilib.ListItem;
 import com.xk.player.uilib.MyList;
 import com.xk.player.uilib.MyText;
 import com.xk.player.uilib.MyText.DeleteListener;
+import com.xk.player.uilib.RadioButton;
 import com.xk.player.uilib.listeners.DragEvent;
 import com.xk.player.uilib.listeners.DragListener;
 import com.xk.player.uilib.listeners.ItemEvent;
@@ -92,8 +94,8 @@ public class PlayUI implements BasicPlayerListener{
 	private Label songName;
 	private long timeNow=0;
 	private MyText text;
-	private Button searchMusic;
-	private Button searchMV;
+	private RadioButton searchMusic;
+	private RadioButton searchMV;
 	private LyricFrame lFrame;
 	private NormalWord lrcWord;
 	private Flash flash;
@@ -365,7 +367,7 @@ public class PlayUI implements BasicPlayerListener{
 			
 		});
 		
-		voice=new Jindutiao(shell, SWT.NONE, 100, config.maxVolume);
+		voice = new Jindutiao(shell, SWT.NONE, 100, config.maxVolume);
 		voice.setCurrent(config.defaultVolume);
 		voice.setBounds(270, 75, 0, 0);
 		VoiceBody body=new VoiceBody();
@@ -385,7 +387,7 @@ public class PlayUI implements BasicPlayerListener{
 		});
 		
 		ImageData heartData=heart.getImageData().scaledTo(20, 20);
-		Image hi=new Image(null,heartData);
+		Image hi = new Image(null,heartData);
 		ColorLabel myLove = new ColorLabel(shell, SWT.NONE,hi,hi);
 		myLove.setBounds(341, 12, 25, 25);
 		myLove.addMouseListener(new MouseAdapter() {
@@ -587,13 +589,16 @@ public class PlayUI implements BasicPlayerListener{
 			
 		});
 		
-		searchMusic = new Button(shell, SWT.RADIO);
-		searchMusic.setBounds(780, 10, 54, 35);
-		searchMusic.setText("歌曲");
+		searchMusic = new RadioButton(shell);
+		searchMusic.setBounds(780, 10, 50, 30);
 		searchMusic.setSelection(true);
+		searchMusic.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		searchMusic.setText("歌曲");
 		
-		searchMV = new Button(shell, SWT.RADIO);
-		searchMV.setBounds(835, 10, 50, 35);
+		
+		searchMV = new RadioButton(shell);
+		searchMV.setBounds(830, 10, 50, 30);
+		searchMV.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		searchMV.setText("MV");
 		
 		AutoCombo com = new AutoCombo(text){
@@ -743,9 +748,10 @@ public class PlayUI implements BasicPlayerListener{
 		if(!name.isEmpty()){
 			showLrcView(2);
 			List<SearchInfo> result = null;
-			if(searchMusic.getSelection()) {
+			int type = searchMusic.getSelection() ? 0 : (searchMV.getSelection() ? 1 : 2);
+			if(type == 0) {
 				result = SongSeacher.getSongFromKuwo(name, Config.getInstance().searchType);
-			} else if(searchMV.getSelection()) {
+			} else if(type == 1) {
 				result = SongSeacher.getMVFromKugou(name);
 			} else {
 				return;
@@ -758,7 +764,12 @@ public class PlayUI implements BasicPlayerListener{
 			result.add(0, head);
 			searchResult.clearAll();
 			for(int i=0;i<result.size();i++){
-				LTableItem item=new MVSearchItem(result.get(i));
+				LTableItem item = null;
+				if(type ==0) {
+					item = new SongSearchItem(result.get(i));
+				}else {
+					item = new MVSearchItem(result.get(i));
+				}
 				if(i==0){
 					item.setHead(true);
 				}

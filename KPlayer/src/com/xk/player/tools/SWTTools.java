@@ -1,6 +1,8 @@
 package com.xk.player.tools;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -8,12 +10,16 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.jsoup.helper.StringUtil;
 
 public class SWTTools {
 
@@ -39,6 +45,24 @@ public class SWTTools {
 		ctrl.addListener(SWT.MouseDown, listener);
 		ctrl.addListener(SWT.MouseMove, listener);
 		
+	}
+	
+	public static void selectDir(final Text source, Button btn) {
+		btn.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent selectionevent) {
+				DirectoryDialog dd = new DirectoryDialog(source.getShell(), SWT.NONE);
+				dd.setMessage("选择目录");
+				dd.setText("打开");
+				String path = dd.open();
+				if(!StringUtil.isBlank(path)) {
+					source.setText(path);
+				}
+			}
+			
+			
+		});
 	}
 	
 	public static void centerWindow(Shell shell){

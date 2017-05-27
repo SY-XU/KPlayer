@@ -30,6 +30,7 @@ import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.JSONUtil;
 import com.xk.player.tools.KrcText;
+import com.xk.player.tools.LRCFactory;
 import com.xk.player.tools.LrcParser;
 import com.xk.player.tools.Util;
 import com.xk.player.ui.PlayUI;
@@ -274,32 +275,8 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		if(stream instanceof File){
 			File file=(File) stream;
 			String filename=file.getName();
-			if(config.isDied()) {
-				config = Config.getInstance();
-			}
-			File songWord = new File(config.lrcPath, filename.substring(0, filename
-					.lastIndexOf("."))
-					+ ".lrc");
-			File xrcWord = new File(config.lrcPath, filename.substring(0, filename
-					.lastIndexOf("."))
-					+ ".zlrc");
-			File krcWord = new File(config.lrcPath, filename.substring(0, filename
-					.lastIndexOf("."))
-					+ ".krc");
-			List<XRCLine> lines=null;
-			if(xrcWord.exists()){
-				String data=FileUtils.readString(xrcWord.getAbsolutePath());
-				lines=JSONUtil.toBean(data, JSONUtil.getCollectionType(List.class, XRCLine.class));
-			}else if (krcWord.exists()) {
-				lines=KrcText.fromKRC(krcWord.getAbsolutePath());
-			}else if (songWord.exists()) {
-				try {
-					LrcParser parser = new LrcParser(allLength);
-					lines = parser.parser(songWord.getAbsolutePath());
-				}catch(Exception e){
-					e.printStackTrace();
-				}
-			}
+			String musicName = filename.substring(0, filename.lastIndexOf("."));
+			List<XRCLine> lines = LRCFactory.fromFile(musicName, allLength);
 			if(null!=lines){
 				setLines(lines);
 			}

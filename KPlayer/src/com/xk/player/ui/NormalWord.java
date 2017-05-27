@@ -30,7 +30,9 @@ import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.JSONUtil;
 import com.xk.player.tools.KrcText;
+import com.xk.player.tools.LRCFactory;
 import com.xk.player.tools.LrcParser;
+
 import org.eclipse.wb.swt.SWTResourceManager;
 
 
@@ -271,33 +273,7 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 
 	public void loadLrc(File file) {
 		songName =file.getName().substring(0, file.getName().lastIndexOf("."));
-		Config config = Config.getInstance();
-		String filename=file.getName();
-		File songWord = new File(config.lrcPath, filename.substring(0, filename
-				.lastIndexOf("."))
-				+ ".lrc");
-		File xrcWord = new File(config.lrcPath, filename.substring(0, filename
-				.lastIndexOf("."))
-				+ ".zlrc");
-		File krcWord = new File(config.lrcPath, filename.substring(0, filename
-				.lastIndexOf("."))
-				+ ".krc");
-		if(xrcWord.exists()){
-			String data=FileUtils.readString(xrcWord.getAbsolutePath());
-			List<XRCLine>lines=JSONUtil.toBean(data, JSONUtil.getCollectionType(List.class, XRCLine.class));
-			setLines(lines);
-		}else if (krcWord.exists()) {
-			List<XRCLine>lines=KrcText.fromKRC(krcWord.getAbsolutePath());
-			setLines(lines);
-		}else if (songWord.exists()) {
-			try {
-				LrcParser parser = new LrcParser(allLength);
-				List<XRCLine> lines = parser.parser(songWord.getAbsolutePath());
-				setLines(lines);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-		}
+		setLines(LRCFactory.fromFile(songName, allLength));
 	}
 	
 	@Override

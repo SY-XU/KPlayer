@@ -33,6 +33,8 @@ public class KrcText {
 		}
 	}
 
+	
+	
 	public static List<XRCLine> fromKRC(String filenm) {
 		List<XRCLine> lines = new ArrayList<XRCLine>();
 		StringReader reader;

@@ -52,7 +52,6 @@ public class SettingComp extends Composite implements ICallable{
 		left.setSimpleSelect(true);
 		left.setMask(55);
 		
-		createComps();
 		
 		Label okBtn = new Label(this, SWT.NONE);
 		okBtn.setBackground(SWTResourceManager.getColor(0, 153, 255));
@@ -93,9 +92,14 @@ public class SettingComp extends Composite implements ICallable{
 				ListItem itm = e.item;
 				SettingParent sp = comps.get(itm);
 				StackLayout sl = (StackLayout) sp.getParent().getLayout();
+				if(null != sl.topControl) {
+					sl.topControl.setVisible(false);
+				}
 				sl.topControl = sp;
+				sl.topControl.setVisible(true);
 			}
 		});
+		createComps();
 	}
 
 	/**
@@ -123,7 +127,12 @@ public class SettingComp extends Composite implements ICallable{
 		lrcComp.loadValues(config);
 		comps.put(song, lrcComp);
 		
+		SettingParent downComp = new DownloadSettingComp(content, SWT.NONE);
+		downComp.setSize(content.getSize());
+		downComp.loadValues(config);
+		comps.put(download, downComp);
 		
+		left.select(0, false);
 		
 	}
 
