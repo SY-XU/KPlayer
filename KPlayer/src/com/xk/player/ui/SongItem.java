@@ -23,10 +23,14 @@ import org.eclipse.swt.widgets.TreeItem;
 
 import com.xk.player.lrc.XLrcMaker;
 import com.xk.player.tools.FileUtils;
+
 import org.eclipse.wb.swt.SWTResourceManager;
+
+import com.xk.player.tools.Config;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.tools.SourceFactory;
 import com.xk.player.uilib.BaseBox;
 import com.xk.player.uilib.ListItem;
 import com.xk.player.uilib.MyList;
@@ -182,7 +186,7 @@ public class SongItem extends ListItem {
 					Object result=bb.open(0, 0);
 					if(null!=result){
 						String name=result.toString();
-						List<SearchInfo>lrcs=SongSeacher.getLrcFromKuwo(name);
+						List<SearchInfo>lrcs = SourceFactory.getSource(Config.getInstance().downloadSource).getLrc(name);//SongSeacher.getLrcFromKuwo(name);
 						BaseBox bbox=new BaseBox(getParent().getShell(), SWT.NO_TRIM);
 						bbox.getShell().setSize(475,330);
 						SWTTools.centerWindow(bbox.getShell());

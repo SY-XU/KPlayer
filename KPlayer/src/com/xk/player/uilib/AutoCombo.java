@@ -32,7 +32,9 @@ import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import com.xk.player.tools.Config;
 import com.xk.player.tools.SongSeacher;
+import com.xk.player.tools.SourceFactory;
 
 
 /**
@@ -101,7 +103,7 @@ public abstract class AutoCombo{
 					
 					@Override
 					public void run() {
-						final Map<String, String> rst = SongSeacher.fastSearch(songName);
+						final Map<String, String> rst = SourceFactory.getSource(Config.getInstance().downloadSource).fastSearch(songName);//SongSeacher.fastSearch(songName);
 						if(null == rst || rst.isEmpty()) {
 							return;
 						}

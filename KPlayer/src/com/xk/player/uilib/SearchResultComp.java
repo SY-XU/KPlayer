@@ -74,7 +74,6 @@ public class SearchResultComp extends Composite implements ICallable{
 		SearchInfo head=new SearchInfo();
 		head.name="歌名";
 		head.singer="歌手";
-		head.url="";
 		LTableItem lo=new LrcItem(head);
 		lo.setHead(true);
 		list.addItem(lo);
@@ -114,7 +113,7 @@ public class SearchResultComp extends Composite implements ICallable{
 				
 				@Override
 				public void run() {
-					String url=info.url;
+					String url=info.getUrl();
 					String html=HTTPUtil.getInstance("player").getHtml(url);
 					persent=30;
 					flush();

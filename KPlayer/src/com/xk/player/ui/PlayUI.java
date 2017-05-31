@@ -43,6 +43,7 @@ import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.HTTPUtil;
 import com.xk.player.tools.JSONUtil;
+import com.xk.player.tools.SourceFactory;
 
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -750,9 +751,9 @@ public class PlayUI implements BasicPlayerListener{
 			List<SearchInfo> result = null;
 			int type = searchMusic.getSelection() ? 0 : (searchMV.getSelection() ? 1 : 2);
 			if(type == 0) {
-				result = SongSeacher.getSongFromKuwo(name, Config.getInstance().searchType);
+				result = SourceFactory.getSource(Config.getInstance().downloadSource).getSong(name, Config.getInstance().searchType);//SongSeacher.getSongFromKuwo(name, Config.getInstance().searchType);
 			} else if(type == 1) {
-				result = SongSeacher.getMVFromKugou(name);
+				result = SourceFactory.getSource(Config.getInstance().downloadSource).getMV(name);//SongSeacher.getMVFromKugou(name);
 			} else {
 				return;
 			}
@@ -811,7 +812,7 @@ public class PlayUI implements BasicPlayerListener{
 				if(StringUtil.isBlank(name)){
 					return;
 				}
-				String path=SongSeacher.getArtistFromKuwo(name);
+				String path=SourceFactory.getSource(Config.getInstance().downloadSource).getArtist(name);//SongSeacher.getArtistFromKuwo(name);
 				System.out.println("path:"+path);
 				if(StringUtil.isBlank(path)){
 					return;

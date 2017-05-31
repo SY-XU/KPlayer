@@ -383,7 +383,7 @@ public class SongSeacher {
 	
 	public static class SearchInfo{
 		boolean urlFound = false;
-		public String url="";
+		String url="";
 		public String name="";
 		public String singer="";
 		public String album="";

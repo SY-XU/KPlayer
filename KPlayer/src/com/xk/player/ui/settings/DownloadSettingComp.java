@@ -16,6 +16,7 @@ public class DownloadSettingComp extends SettingParent {
 	private Text lrcPath;
 	private Text downPath;
 	private Combo type;
+	private Combo source;
 
 	public DownloadSettingComp(Composite parent, int style) {
 		super(parent, style);
@@ -59,7 +60,15 @@ public class DownloadSettingComp extends SettingParent {
 		type.add("ape");
 		type.add("mp3");
 		
+		Label sourceL = new Label(this, SWT.NONE);
+		sourceL.setText("数据源:");
+		sourceL.setAlignment(SWT.RIGHT);
+		sourceL.setBounds(36, 189, 61, 17);
 		
+		source = new Combo(this, SWT.NONE);
+		source.setBounds(108, 189, 126, 25);
+		source.add("kugou");
+		source.add("kuwo");
 	}
 	
 
@@ -67,8 +76,8 @@ public class DownloadSettingComp extends SettingParent {
 	public void setProperties(Config config) {
 		config.downloadPath = downPath.getText();
 		config.lrcPath = lrcPath.getText();
-		config.searchType = type.getItem(type.getSelectionIndex());
-		
+		config.searchType = type.getItem(type.indexOf(type.getText()));
+		config.downloadSource = source.getItem(source.indexOf(source.getText()));
 	}
 
 	@Override
@@ -76,6 +85,6 @@ public class DownloadSettingComp extends SettingParent {
 		downPath.setText(config.downloadPath);
 		lrcPath.setText(config.lrcPath);
 		type.setText(config.searchType);
-		
+		source.setText(config.downloadSource);
 	}
 }

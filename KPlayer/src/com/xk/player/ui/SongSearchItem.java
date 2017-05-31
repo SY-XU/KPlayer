@@ -26,9 +26,8 @@ public class SongSearchItem extends LTableItem {
 			@Override
 			public void run() {
 				Config conf=Config.getInstance();
-				String url=info.url;
-				String realUrl=HTTPUtil.getInstance("player").getHtml(url);
-				SongLocation loc=HTTPUtil.getInstance("player").getInputStream(realUrl);
+				String url=info.getUrl();
+				SongLocation loc=HTTPUtil.getInstance("player").getInputStream(url);
 				String parent=conf.downloadPath;
 				if(null==parent||parent.trim().isEmpty()){
 					parent="e:/download";

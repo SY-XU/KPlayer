@@ -104,7 +104,7 @@ public class SendMusic extends Composite implements ICallable{
 		MessageListener ml = new MessageListener();
 		ml.registListener(new MsgHandler());
 		client.setListener(ml);
-		client.init("10.60.15.162", 5492);
+		client.init("120.25.90.35", 5492);
 		PackageInfo info = new PackageInfo(MinaClient.SERVER, "", client.getCid(), "hps", MinaClient.APP);
 		client.writeMessage(JSONUtil.toJson(info));
 	}

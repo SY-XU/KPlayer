@@ -62,6 +62,9 @@ public class Config implements Cloneable{
 	//搜索下载类型
 	public String searchType = "ape";
 	
+	//数据源
+	public String downloadSource = "kuwo";
+	
 	@JsonIgnore
 	private boolean died = false;
 	
