@@ -126,11 +126,12 @@ public class KugouSource implements IDownloadSource {
 							return url;
 						}
 						String url = "http://www.kugou.com/yy/index.php";
-						Map<String, String> params = new HashMap<>();
-						params.put("r", "play/getdata");
-						params.put("hash", this.url);
-						params.put("album_id", "" + minfo.get("AlbumID"));
-						params.put("_", String.valueOf(System.currentTimeMillis()));
+						List<HttpRequestParam> params = new ArrayList<HttpRequestParam>();
+//						Map<String, String> params = new HashMap<>();
+						params.add(HttpRequestParam.put("r", "play/getdata"));
+						params.add(HttpRequestParam.put("hash", this.url));
+						params.add(HttpRequestParam.put("album_id", "" + minfo.get("AlbumID")));
+						params.add(HttpRequestParam.put("_", String.valueOf(System.currentTimeMillis())));
 						String rst = HTTPUtil.getInstance("test").getHtml(url, params);
 						Map<String, Object> map = JSONUtil.fromJson(rst);
 						this.urlFound = true;

@@ -33,6 +33,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 
+
 public class HTTPUtil {
 	public CloseableHttpClient httpClient = HttpClientUtils.createSSLClientDefault();
 	public static String cid=null;
@@ -62,6 +63,18 @@ public class HTTPUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public String getHtml(String url, List<HttpRequestParam> params) {
+		if(null != params) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("?");
+			for(HttpRequestParam param : params) {
+				sb.append(param.key).append("=").append(param.value).append("&");
+			}
+			url += sb.toString();
+		}
+		return getHtml(url);
 	}
 	
 	public String getHtml(String url, Map<String, String> params) {
