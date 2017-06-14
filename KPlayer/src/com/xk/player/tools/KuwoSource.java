@@ -23,7 +23,7 @@ public class KuwoSource implements IDownloadSource {
 	public String getArtist(String name) {
 		String searchUrl=null;
 		try {
-			searchUrl="http://sou.kuwo.cn/ws/NSearch?type=artist&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
+			searchUrl="http://sou.kuwo.cn/ws/NSearch?type=artist&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku20177";
 		} catch (UnsupportedEncodingException e) {
 			return null;
 		}
@@ -46,7 +46,7 @@ public class KuwoSource implements IDownloadSource {
 		List<SearchInfo> lrcs=new ArrayList<SearchInfo>();
 		String searchUrl=null;
 		try {
-			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=music&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
+			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=music&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku20177";
 		} catch (UnsupportedEncodingException e) {
 			return lrcs;
 		}
@@ -86,7 +86,7 @@ public class KuwoSource implements IDownloadSource {
 		List<SearchInfo> songs=new ArrayList<SearchInfo>();
 		String searchUrl=null;
 		try {
-			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=mv&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
+			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=mv&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku20177";
 		} catch (UnsupportedEncodingException e) {
 			return songs;
 		}
@@ -146,7 +146,7 @@ public class KuwoSource implements IDownloadSource {
 		List<SearchInfo> songs=new ArrayList<SearchInfo>();
 		String searchUrl=null;
 		try {
-			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=music&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku2016";
+			searchUrl = "http://sou.kuwo.cn/ws/NSearch?type=music&key="+URLEncoder.encode(name, "utf-8")+"&catalog=yueku20177";
 		} catch (UnsupportedEncodingException e) {
 			return songs;
 		}
