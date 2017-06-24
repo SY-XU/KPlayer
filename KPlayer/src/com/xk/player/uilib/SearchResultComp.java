@@ -23,10 +23,10 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 
-public class SearchResultComp extends Composite implements ICallable{
+public class SearchResultComp extends Composite implements ICallable<String>{
 
 	private MyList list;
-	private ICallback callBack;
+	private ICallback<String> callBack;
 	private Label label;
 	private String path;
 	/**
@@ -88,7 +88,7 @@ public class SearchResultComp extends Composite implements ICallable{
 	}
 
 	@Override
-	public void setCallBack(ICallback callBack) {
+	public void setCallBack(ICallback<String> callBack) {
 		this.callBack=callBack;
 		
 	}
