@@ -32,6 +32,7 @@ import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 import com.xk.player.tools.SourceFactory;
 import com.xk.player.uilib.BaseBox;
+import com.xk.player.uilib.DelMusicComp;
 import com.xk.player.uilib.ListItem;
 import com.xk.player.uilib.MyList;
 import com.xk.player.uilib.SearchComp;
@@ -242,7 +243,13 @@ public class SongItem extends ListItem {
 
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
-					getParent().removeItem(SongItem.this);
+					BaseBox bb=new BaseBox(getParent().getShell(), SWT.NO_TRIM);
+					bb.getShell().setSize(300, 130);
+					SWTTools.centerWindow(bb.getShell());
+					DelMusicComp comp = new DelMusicComp(bb.getShell(), SWT.NONE);
+					comp.setTarget(SongItem.this);
+					bb.add(comp);
+					bb.open(0, 0);
 				}
 				
 			});

@@ -954,7 +954,7 @@ public class PlayUI implements BasicPlayerListener{
 	 * 
 	 * @author o-kui.xiao
 	 */
-	private void playNext(){
+	public void playNext(){
 		if(currentPlay!=types.getSelectIndex()){
 			types.select(currentPlay, true);
 		}
