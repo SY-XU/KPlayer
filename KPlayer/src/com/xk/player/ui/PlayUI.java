@@ -872,46 +872,14 @@ public class PlayUI implements BasicPlayerListener{
 		if(file.exists()&&file.isFile()){
 			Config config=Config.getInstance();
 			Map<String,String>pro=config.maps.get(path);
-			try {
-				if(null==pro){
-					System.out.println("no properties found:"+path);
-					pro=new HashMap<String, String>();
-					MusicMetadataSet data = new MyID3().read(file);
-					MusicMetadata metadata = (MusicMetadata) data.getSimplified();
-					
-					String artist=metadata.getArtist();
-					String album=metadata.getAlbum();
-					String title=metadata.getSongTitle();
-					if(null!=artist){
-						artist=new String(artist.getBytes(FileUtils.getEncoding(artist)),"GB2312");
-						if(artist.indexOf("&")>=0){
-							artist=artist.split("&")[0];
-						}
-					}else{
-						artist=file.getName().split("-")[0].trim();
-					}
-					if(null!=album){
-						album=new String(album.getBytes(FileUtils.getEncoding(album)),"GB2312");
-					}
-					if(null!=title){
-						title=new String(title.getBytes(FileUtils.getEncoding(title)),"GB2312");
-					}
-					
-					pro.put("artist", artist);
-					pro.put("album", album);
-					pro.put("title", title);
-					config.maps.put(path, pro);
-				}
-				
-			} catch (Exception e) {
-				if(null==pro){
-					System.out.println("no properties found:"+path);
-					pro=new HashMap<String, String>();
-				}
-				String artist=file.getName().split("-")[0].trim();
-				pro.put("artist", artist);
-				config.maps.put(path, pro);
+			
+			if(null==pro){
+				System.out.println("no properties found:"+path);
+				pro=new HashMap<String, String>();
 			}
+			String artist=file.getName().split("-")[0].trim();
+			pro.put("artist", artist);
+			config.maps.put(path, pro);
 			String name=file.getName();
 			pro.put("name", name.substring(0, name.lastIndexOf(".")));
 			pro.put("path", path);

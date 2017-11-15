@@ -123,17 +123,35 @@ public class SongSeacher {
 		
 	}
 	
+	/**
+	 * 从html中解析从歌词
+	 * @param html
+	 * @return
+	 * @author o-kui.xiao
+	 */
 	public static LrcInfo perseFromHTML(String html){
 		Document doc=Jsoup.parse(html);
-		Elements lrcs=doc.select("p[class=lrcItem]");
+		Elements lrcs=doc.select("script");
 		LrcInfo lrc=new LrcInfo();
 		Map<Long,String> infos=new HashMap<Long, String>();
 		for(Element ele:lrcs){
-			String time=ele.attr("data-time");
-			double dtime=Double.parseDouble(time);
-			long ltime=(long) (dtime*1000);
-			String text=ele.text();
-			infos.put(ltime, text);
+			String content = ele.html();
+			if(null != content) {
+				content = content.trim();
+				System.out.println(content);
+				if(content.startsWith("var lrcList = ")) {
+					content = content.replace("var lrcList = ", "");
+					List<Map<String, String>> listLrcs = JSONUtil.toBean(content, JSONUtil.getCollectionType(List.class, Map.class));
+					for(Map<String, String> lrcLine : listLrcs) {
+						String time = lrcLine.get("time");
+						double dtime = Double.parseDouble(time);
+						long ltime = (long) (dtime*1000);
+						String text = lrcLine.get("lineLyric");
+						infos.put(ltime, text);
+					}
+					break;
+				}
+			}
 		}
 		lrc.setInfos(infos);
 		return lrc;
