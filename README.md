@@ -28,6 +28,7 @@ java音乐播放器<br>
 #说明
  * 数据来源：酷我音乐网，特别感谢不加密的酷我。
  * 数据源也来自酷狗，原谅我看了酷我SWF脚本，偷偷把地址找到了。
+ * 网易云音乐火的一逼，赶紧上了一波网易云(仅单曲和歌词)，感谢[sqaiyan/netmusic-node](https://github.com/sqaiyan/netmusic-node)提供的API
  * 请将歌词文件放在专用目录下，名字保持一致。如(歌曲:d:/music/冬天的秘密.mp3,歌词:d:/music/冬天的秘密.krc)。
  * 界面自定义组件，基本上都是Canvas画出来的！
  * 首次使用请删除项目根目录下的config.jc,这是我的配置，然后修改Config.java改成你自己的配置。
