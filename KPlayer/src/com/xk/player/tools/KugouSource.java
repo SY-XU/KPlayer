@@ -14,9 +14,22 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.xk.player.lrc.XRCLine;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 
 public class KugouSource implements IDownloadSource {
+
+	
+	
+	@Override
+	public List<XRCLine> parse(String content) {
+		return new ArrayList<XRCLine>();
+	}
+
+	@Override
+	public SongLocation getInputStream(String url) {
+		return HTTPUtil.getInstance("player").getInputStream(url);
+	}
 
 	@Override
 	public List<SearchInfo> getLrc(String name) {

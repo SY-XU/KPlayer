@@ -8,11 +8,16 @@ import java.util.Map;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import com.xk.player.lrc.XRCLine;
 import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.JSONUtil;
 import com.xk.player.tools.LrcInfo;
+import com.xk.player.tools.SourceFactory;
+
 import org.eclipse.wb.swt.SWTResourceManager;
+
 import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SongSeacher.SearchInfo;
 import com.xk.player.ui.LTableItem;
@@ -123,7 +128,7 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					LrcInfo lrcs=SongSeacher.perseFromHTML(html);
+					List<XRCLine> lrcs = SourceFactory.getSource(Config.getInstance().downloadSource).parse(html);
 					persent=60;
 					flush();
 					try {
@@ -132,19 +137,9 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					Map<Long ,String>ls=lrcs.getInfos();
-					StringBuffer sb=new StringBuffer();
-					for(Long time:ls.keySet()){
-						String text=ls.get(time);
-						long mil=(time%1000);
-						long sec=time/1000;
-						long mun=sec/60;
-						long second=sec%60;
-						sb.append("[").append(format(mun))
-						.append(":").append(format(second)).append(".")
-						.append(format(mil)).append("]").append(text).append("\r\n");
-					}
-					String lrcPath = Config.getInstance().lrcPath + "/" + path + ".lrc";
+					
+					String sb = JSONUtil.toJson(lrcs);
+					String lrcPath = Config.getInstance().lrcPath + "/" + path + ".zlrc";
 					File file = new File(lrcPath);
 					if(file.exists()) {
 						file.delete();
@@ -161,7 +156,7 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					FileUtils.writeString(sb.toString(), file);
+					FileUtils.writeString(sb, file);
 					persent=100;
 					flush();
 					try {

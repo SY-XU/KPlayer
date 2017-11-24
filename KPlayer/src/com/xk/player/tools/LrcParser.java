@@ -7,6 +7,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;   
 import java.io.InputStream;   
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,7 +28,6 @@ import com.xk.player.lrc.XRCNode;
  *  @author xiaokui
  */  
 public class LrcParser {   
-    private LrcInfo lrcinfo = new LrcInfo();   
     private Long allLength;
   
     public LrcParser(Long allLength){
@@ -45,11 +47,9 @@ public class LrcParser {
         InputStream ins = new FileInputStream(f);   
         return ins;   
     }   
-  
-    public List<XRCLine> parser(String path) throws Exception {   
-        InputStream in = readLrcFile(path);   
-        lrcinfo = parser(in);
-        Map<Long, String> maps = lrcinfo.getInfos();
+    
+    public List<XRCLine> toXrc(LrcInfo lrcinfo) {
+    	Map<Long, String> maps = lrcinfo.getInfos();
         Long[]templist = new Long[maps.keySet().size()];
 		Iterator<Long> itr = maps.keySet().iterator();
 		int index = 0;
@@ -90,8 +90,21 @@ public class LrcParser {
 				lastLine.nodes.add(node);
 			}
 		}
-        return lines;   
-  
+        return lines;
+    }
+    
+    public List<XRCLine> parserToXrc(Reader in) {
+    	LrcInfo lrcinfo = parser(in);
+        return toXrc(lrcinfo);
+    }
+    public List<XRCLine> parserToXrc(InputStream in) {
+    	LrcInfo lrcinfo = parser(in);
+        return toXrc(lrcinfo);
+    }
+    
+    public List<XRCLine> parser(String path) throws Exception {   
+        InputStream in = readLrcFile(path); 
+        return parserToXrc(in);
     }   
        
     private Long[] sortList(Long[] timelist) {
@@ -109,6 +122,37 @@ public class LrcParser {
 
 	}
     
+    public LrcInfo parser(Reader read) {
+    	LrcInfo lrcinfo = new LrcInfo();
+    	try {
+			BufferedReader reader = new BufferedReader(read);   
+			// 一行一行的读，每读一行，解析一行   
+			String line = null;   
+			Map<Long, String> maps = new HashMap<Long, String>();
+			while ((line = reader.readLine()) != null) {  
+			    parserLine(line, maps, lrcinfo);   
+			}
+			lrcinfo.setInfos(maps);   
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			// 全部解析完后，设置info   
+	        try {
+	        	if(null != read) {
+	        		read.close();
+	        	}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+        
+        
+        
+        return lrcinfo; 
+    }
+    
     /**  
      * 将输入流中的信息解析，返回一个LrcInfo对象  
      *   
@@ -117,19 +161,36 @@ public class LrcParser {
      * @return 解析好的LrcInfo对象  
      * @throws IOException  
      */  
-    public LrcInfo parser(InputStream inputStream) throws IOException {   
+    public LrcInfo parser(InputStream inputStream) {   
         // 三层包装   
-        InputStreamReader inr = new InputStreamReader(inputStream,"UTF-8");   
-        BufferedReader reader = new BufferedReader(inr);   
-        // 一行一行的读，每读一行，解析一行   
-        String line = null;   
-        Map<Long, String> maps = new HashMap<Long, String>();
-        while ((line = reader.readLine()) != null) {  
-            parserLine(line,maps);   
-        }   
-        // 全部解析完后，设置info   
-        inputStream.close();
-        lrcinfo.setInfos(maps);   
+    	LrcInfo lrcinfo = new LrcInfo();
+		try {
+			InputStreamReader inr = new InputStreamReader(inputStream, StandardCharsets.UTF_8); 
+			BufferedReader reader = new BufferedReader(inr);   
+			// 一行一行的读，每读一行，解析一行   
+			String line = null;   
+			Map<Long, String> maps = new HashMap<Long, String>();
+			while ((line = reader.readLine()) != null) {  
+			    parserLine(line, maps, lrcinfo);   
+			}
+			lrcinfo.setInfos(maps);   
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			// 全部解析完后，设置info   
+	        try {
+	        	if(null != inputStream) {
+	        		inputStream.close();
+	        	}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+        
+        
+        
         return lrcinfo;   
     }   
   
@@ -140,7 +201,7 @@ public class LrcParser {
      * @param str  
      * @param maps 
      */  
-    private void parserLine(String str, Map<Long, String> maps) {   
+    private void parserLine(String str, Map<Long, String> maps, LrcInfo lrcinfo) {   
         // 取得歌曲名信息   
         if (str.startsWith("[ti:")) {   
             String title = str.substring(4, str.length() - 1);   

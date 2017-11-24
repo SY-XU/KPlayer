@@ -20,6 +20,10 @@ public interface IDownloadSource {
 	
 	public String getArtist(String name);
 	
+	public SongLocation getInputStream(String url);
+	
+	public List<XRCLine> parse(String content);
+	
 	
 	
 }

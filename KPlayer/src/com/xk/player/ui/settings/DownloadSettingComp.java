@@ -69,6 +69,7 @@ public class DownloadSettingComp extends SettingParent {
 		source.setBounds(108, 189, 126, 25);
 		source.add("kugou");
 		source.add("kuwo");
+		source.add("ne");
 	}
 	
 

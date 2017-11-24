@@ -19,6 +19,13 @@ import com.xk.player.tools.SongSeacher.SearchInfo;
 
 public class KuwoSource implements IDownloadSource {
 
+	
+	@Override
+	public List<XRCLine> parse(String content) {
+		LrcInfo info = SongSeacher.perseFromHTML(content);
+		return new LrcParser((long)Integer.MAX_VALUE).toXrc(info);
+	}
+
 	@Override
 	public String getArtist(String name) {
 		String searchUrl=null;
@@ -248,6 +255,11 @@ public class KuwoSource implements IDownloadSource {
 			result.put(map.get("NAME"), map.get("SONGNAME"));
 		}
 		return result;
+	}
+
+	@Override
+	public SongLocation getInputStream(String url) {
+		return HTTPUtil.getInstance("player").getInputStream(url);
 	}
 
 }

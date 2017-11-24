@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -665,6 +666,22 @@ public final class Util {
         }
         
         return result;
+    }
+    
+    public static String join(Collection<? extends Object> collection, String toJoin) {
+    	StringBuffer sb = new StringBuffer();
+    	int index = 0;
+    	for(Object element : collection) {
+    		if(null == element) {
+    			continue;
+    		}
+    		sb.append(element);
+    		if(++index == collection.size()) {
+    			break;
+    		}
+    		sb.append(toJoin);
+    	}
+    	return sb.toString();
     }
 
     public static String formatFieldValues(Object values, String separator) {

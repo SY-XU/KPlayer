@@ -112,6 +112,7 @@ public class HTTPUtil {
 		            while ((temp = br.readLine()) != null) {  
 		                result.append(temp);  
 		            }  
+		            br.close();
 				}
 				return null;
 			}else if(200==response.getStatusLine().getStatusCode()){
@@ -122,6 +123,7 @@ public class HTTPUtil {
 	            while ((temp = br.readLine()) != null) {  
 	                result.append(temp);  
 	            }  
+	            br.close();
 			}
 			response.close();
 		}  catch (Exception e) {
@@ -251,6 +253,7 @@ public class HTTPUtil {
             while ((temp = br.readLine()) != null) {  
                 result.append(temp);  
             }  
+            br.close();
         }  
         httppost.releaseConnection();
         response.close();
@@ -286,6 +289,7 @@ public class HTTPUtil {
 			while ((temp = br.readLine()) != null) {  
 				result.append(temp);  
 			}  
+			br.close();
 		}  
 		httppost.releaseConnection();
 		response.close();
@@ -329,6 +333,7 @@ public class HTTPUtil {
 			while ((temp = br.readLine()) != null) {  
 				result.append(temp);  
 			}  
+			br.close();
 		}  
 		httppost.releaseConnection();
 		response.close();

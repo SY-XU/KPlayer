@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +37,23 @@ public class KrcText {
 	
 	
 	public static List<XRCLine> fromKRC(String filenm) {
-		List<XRCLine> lines = new ArrayList<XRCLine>();
 		StringReader reader;
 		try {
 			reader = new StringReader(new KrcText().getKrcText(filenm));
 		} catch (IOException e) {
-			return lines;
+			return new ArrayList<XRCLine>();
 		}
-		BufferedReader br = new BufferedReader(reader);
+		return fromReader(reader);
+	}
+	
+	public static List<XRCLine> fromReader(Reader read) {
+		return fromReader(read, "\\<[0-9]*,[0-9]*,[0-9]*\\>(\\w+'*\\w*\\s*|[\u4E00-\u9FA5]{1})", "<", ">", 3, false);
+	}
+	
+	
+	public static List<XRCLine> fromReader(Reader read, String regNode, String left, String right, int size, boolean plus) {
+		List<XRCLine> lines = new ArrayList<XRCLine>();
+		BufferedReader br = new BufferedReader(read);
 		String line = null;
 		try {
 			while ((line = br.readLine()) != null) {
@@ -64,22 +74,26 @@ public class KrcText {
 					}
 
 				}
-				String regNode = "\\<[0-9]*,[0-9]*,[0-9]*\\>(\\w+'*\\w*\\s*|[\u4E00-\u9FA5]{1})";
 				Pattern patternNode = Pattern.compile(regNode);
 				Matcher matcherNode = patternNode.matcher(line);
-
+				long plusd = 0L;
 				while (matcherNode.find()) {
 					int groupCount = matcherNode.groupCount();
 					for (int i = 0; i <= groupCount; i++) {
 						String msg = matcherNode.group(i);
 						XRCNode node = new XRCNode();
-						int last = msg.indexOf(">") + 1;
+						int last = msg.indexOf(right) + 1;
 						node.word = msg.substring(last, msg.length());
-						msg = msg.substring(0, last).replace("<", "").replace(">", "");
+						msg = msg.substring(0, last).replace(left, "").replace(right, "");
 						String[] spls = msg.split(",");
-						if (spls.length == 3) {
-							node.start = Long.parseLong(spls[0]);
+						if (spls.length == size) {
+							if(plus) {
+								node.start = plusd;
+							} else {
+								node.start = Long.parseLong(spls[0]);
+							}
 							node.length = Long.parseLong(spls[1]);
+							plusd += node.length;
 							xline.nodes.add(node);
 						}
 					}
