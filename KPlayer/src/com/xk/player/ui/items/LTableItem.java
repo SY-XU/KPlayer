@@ -1,4 +1,4 @@
-package com.xk.player.ui;
+package com.xk.player.ui.items;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -10,9 +10,10 @@ import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Display;
 
 import com.xk.player.tools.FileUtils;
+
 import org.eclipse.wb.swt.SWTResourceManager;
-import com.xk.player.tools.SWTTools;
-import com.xk.player.tools.SongSeacher.SearchInfo;
+
+import com.xk.player.tools.sources.IDownloadSource.SearchInfo;
 import com.xk.player.uilib.ListItem;
 import com.xk.player.uilib.MyList;
 

@@ -55,7 +55,7 @@ public class DownloadSettingComp extends SettingParent {
 		label_1.setAlignment(SWT.RIGHT);
 		label_1.setBounds(36, 133, 61, 17);
 		
-		type = new Combo(this, SWT.NONE);
+		type = new Combo(this, SWT.READ_ONLY);
 		type.setBounds(108, 125, 126, 25);
 		type.add("ape");
 		type.add("mp3");
@@ -65,11 +65,12 @@ public class DownloadSettingComp extends SettingParent {
 		sourceL.setAlignment(SWT.RIGHT);
 		sourceL.setBounds(36, 189, 61, 17);
 		
-		source = new Combo(this, SWT.NONE);
+		source = new Combo(this, SWT.READ_ONLY);
 		source.setBounds(108, 189, 126, 25);
 		source.add("kugou");
 		source.add("kuwo");
 		source.add("ne");
+		source.add("qier");
 	}
 	
 

@@ -1,4 +1,4 @@
-package com.xk.player.tools;
+package com.xk.player.tools.sources;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -15,7 +15,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.xk.player.lrc.XRCLine;
-import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.tools.ByteUtil;
+import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.HttpRequestParam;
+import com.xk.player.tools.JSONUtil;
+import com.xk.player.tools.SongLocation;
 
 public class KugouSource implements IDownloadSource {
 
@@ -78,9 +82,15 @@ public class KugouSource implements IDownloadSource {
 						String url = "http://trackermv.kugou.com/interface/index/cmd=100&hash=" + this.url + "&key=" + md5 + "&pid=6&ext=mp4&ismp3=0";
 						String rst = HTTPUtil.getInstance("test").getHtml(url);
 						Map<String, Object> map = JSONUtil.fromJson(rst);
-						this.urlFound = true;
 						this.url = (String)((Map<String , Map<String, Object>>)map.get("mvdata")).get("sd").get("downurl");
+						this.flashVars.put("url", this.url);
+						this.urlFound = true;
 						return this.url;
+					}
+
+					@Override
+					public String getLrcUrl() {
+						return "";
 					}
 					
 				};
@@ -150,6 +160,11 @@ public class KugouSource implements IDownloadSource {
 						this.urlFound = true;
 						this.url = (String) ((Map<String, Object>)map.get("data")).get("play_url");
 						return this.url;
+					}
+
+					@Override
+					public String getLrcUrl() {
+						return null;
 					}
 				};
 				songs.add(info);

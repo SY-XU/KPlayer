@@ -28,10 +28,10 @@ public abstract class ListItem {
 	}
 	
 	public void select(){
-		selected=true;
-		if(null!=parent){
-			parent.selectIndex=parent.getItems().indexOf(this);
-			parent.selected=this;
+		selected = true;
+		if(null != parent){
+			parent.selectIndex = parent.getItems().indexOf(this);
+			parent.selected = this;
 		}
 	}
 	
@@ -41,6 +41,10 @@ public abstract class ListItem {
 	
 	public void unSelect(){
 		selected=false;
+		if(null != parent){
+			parent.selectIndex = -1;
+			parent.selected = null;
+		}
 	}
 
 	public MyList getParent() {

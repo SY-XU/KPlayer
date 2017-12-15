@@ -1,4 +1,4 @@
-package com.xk.player.tools;
+package com.xk.player.tools.sources;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,7 +26,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -35,7 +34,15 @@ import org.apache.http.message.BasicNameValuePair;
 import sun.misc.BASE64Encoder;
 
 import com.xk.player.lrc.XRCLine;
-import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.tools.EncryptUtils;
+import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.HttpClientUtils;
+import com.xk.player.tools.JSONUtil;
+import com.xk.player.tools.KrcText;
+import com.xk.player.tools.LrcParser;
+import com.xk.player.tools.Md5;
+import com.xk.player.tools.SongLocation;
+import com.xk.player.tools.Util;
 
 public class NetEasySource implements IDownloadSource {
 
@@ -58,58 +65,6 @@ public class NetEasySource implements IDownloadSource {
 		result = result.replace("/", "_");
 		result = result.replace("+", "_");
 		return result;
-	}
-	
-	private List<SearchInfo> getUrl(List<String> ids) {
-		if(null == ids || ids.isEmpty()) {
-			return new ArrayList<SongSeacher.SearchInfo>();
-		}
-		List<SearchInfo> info = new ArrayList<SongSeacher.SearchInfo>();
-		String url = String.format("http://music.163.com/api/song/detail?ids=[%s]", Util.join(ids, ","));
-		String data = get(url);
-		Map<String, Object> result = JSONUtil.fromJson(data);
-		if(null != result) {
-			List<Map<String, Object>> songs = (List<Map<String, Object>>) result.get("songs");
-			if(null != songs) {
-				for(Map<String, Object> song : songs) {
-					SearchInfo si = new SearchInfo() {
-						@Override
-						public String getUrl() {
-							if(urlFound) {
-								return this.url;
-							}
-							Map<String, Object> mMusic = JSONUtil.fromJson(this.url);
-							String song_id = mMusic.get("id").toString();
-							String enc_id = encodeSong(song_id);
-							String songUrl = String.format("http://m1.music.126.net/%s/%s.mp3", enc_id, song_id);
-							urlFound = true;
-							return songUrl;
-						}
-						
-					};
-					si.name = (String) song.get("name");
-					List<Map<String, Object>> artists = (List<Map<String, Object>>) song.get("artists");
-					if(null != artists && artists.size() > 0) {
-						si.singer = (String) artists.get(0).get("name");
-					}
-					Map<String, Object> album = (Map<String, Object>) song.get("album");
-					if(null != album) {
-						si.album = (String) album.get("name");
-					}
-					Map<String, Object> mMusic = (Map<String, Object>) song.get("mMusic");
-					if(null != mMusic) {
-						mMusic.put("dfsId", song.get("id"));
-						si.url = JSONUtil.toJson(mMusic);
-						si.type = (String) mMusic.get("extension");
-					}else {
-						continue;
-					}
-					info.add(si);
-					
-				}
-			}
-		}
-		return info;
 	}
 	
 	private void addCookies(HttpResponse response) {
@@ -236,7 +191,7 @@ public class NetEasySource implements IDownloadSource {
 
 	@Override
 	public List<SearchInfo> getLrc(String name) {
-		List<SearchInfo> info = new ArrayList<SongSeacher.SearchInfo>();
+		List<SearchInfo> info = new ArrayList<IDownloadSource.SearchInfo>();
 		Map<String, Object> result = search(name, "1");
 		if(null != result && null != result.get("result")) {
 			Map<String, Object> rst = (Map<String, Object>) result.get("result");
@@ -254,6 +209,11 @@ public class NetEasySource implements IDownloadSource {
 								Object id = mMusic.get("id");
 								urlFound = true;
 								return "http://music.163.com/api/song/lyric?os=osx&id=" + id + "&lv=-1&kv=-1&tv=-1";
+							}
+
+							@Override
+							public String getLrcUrl() {
+								return "";
 							}
 							
 						};
@@ -285,15 +245,94 @@ public class NetEasySource implements IDownloadSource {
 
 	@Override
 	public List<SearchInfo> getMV(String name) {
-		// TODO Auto-generated method stub
-		return Collections.emptyList();
+		List<SearchInfo> rst = new ArrayList<IDownloadSource.SearchInfo>();
+		Map<String, Object> info = search(name, "1004");
+		if(null == info) {
+			return rst;
+		}
+		Map<String, Object> result = (Map<String, Object>) info.get("result");
+		if(null == result) {
+			return rst;
+		}
+		List<Map<String, Object>> mvs = (List<Map<String, Object>>) result.get("mvs");
+		if(null == mvs) {
+			return rst;
+		}
+		for(Map<String, Object> mv : mvs) {
+			SearchInfo si = new SearchInfo(){
+
+				@Override
+				public String getUrl() {
+					if(urlFound) {
+						return url;
+					}
+					Map<String, Object> params = new HashMap<String, Object>();
+					params.put("id", url);
+					params.put("csrf_token", "");
+					String json = JSONUtil.toJson(params);
+					Map<String, String> p = EncryptUtils.encrypt(json);
+					List<BasicNameValuePair> fromparams = new ArrayList<BasicNameValuePair>();
+					fromparams.add(new BasicNameValuePair("params", p.get("params")));
+					fromparams.add(new BasicNameValuePair("encSecKey", p.get("encSecKey")));
+					fromparams.add(new BasicNameValuePair("type", "mp4"));
+					fromparams.add(new BasicNameValuePair("id", url));
+					String target = "http://music.163.com/api/mv/detail";
+					String data = post(target, fromparams);
+					Map<String, Object> result = JSONUtil.fromJson(data);
+					if(null == result) {
+						return null;
+					}
+					Map<String, Object> dt = (Map<String, Object>) result.get("data");
+					if(null == dt) {
+						return null;
+					}
+					Map<String, String> brs = (Map<String, String>) dt.get("brs");
+					if(null == brs) {
+						return null;
+					}
+					String[] fbls = new String[]{"1080", "720", "480", "240"};
+					for(String fbl : fbls) {
+						String finalUrl = brs.get(fbl);
+						if(null != finalUrl) {
+							this.flashVars.clear();
+							this.flashVars.put("hurl", "");
+							this.flashVars.put("autoPlay", "true");
+							this.flashVars.put("murl", finalUrl);
+							this.flashVars.put("trackName", (String)dt.get("name"));
+							this.flashVars.put("artistName", (String)dt.get("artistName"));
+							this.flashVars.put("resourceId", dt.get("id").toString());
+							this.flashVars.put("coverImg", (String)dt.get("cover"));
+							this.flashVars.put("restrict", "false");
+							this.swfUrl = "http://s1.music.126.net/style/swf/MVPlayer_fee.swf?v=20170527";
+							urlFound = true;
+							url = finalUrl;
+							return finalUrl;
+						}
+					}
+					
+					return null;
+				}
+
+				@Override
+				public String getLrcUrl() {
+					return "";
+				}
+				
+			};
+			si.name = (String) mv.get("name");
+			si.type = "mv";
+			si.singer = (String) mv.get("artistName");
+			si.url = mv.get("id").toString();
+			rst.add(si);
+		}
+		return rst;
 	}
 
 	/**
 	 * @param name 名称
 	 * @param type 单曲(1)，歌手(100)，专辑(10)，歌单(1000)，用户(1002) *(type)*
 	 * @return
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private Map<String, Object> search(String name, String type) {
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -315,7 +354,7 @@ public class NetEasySource implements IDownloadSource {
 	
 	@Override
 	public List<SearchInfo> getSong(String name) {
-		List<SearchInfo> info = new ArrayList<SongSeacher.SearchInfo>();
+		List<SearchInfo> info = new ArrayList<IDownloadSource.SearchInfo>();
 		Map<String, Object> result = search(name, "1");
 		if(null != result && null != result.get("result")) {
 			Map<String, Object> rst = (Map<String, Object>) result.get("result");
@@ -332,7 +371,8 @@ public class NetEasySource implements IDownloadSource {
 								Map<String, Object> mMusic = JSONUtil.fromJson(this.url);
 								Map<String, Object> params = new HashMap<String, Object>();
 								List<Object> ids = new ArrayList<Object>();
-								ids.add(mMusic.get("id"));
+								Object id = mMusic.get("id");
+								ids.add(id);
 								params.put("ids", ids);
 								params.put("br", mMusic.get("br"));
 								params.put("csrf_token", "");
@@ -348,14 +388,28 @@ public class NetEasySource implements IDownloadSource {
 									List<Map<String, Object>> urls = (List<Map<String, Object>>) result.get("data");
 									if(null != urls && !urls.isEmpty()) {
 										urlFound = true;
-										return (String) urls.get(0).get("url");
+										url = (String) urls.get(0).get("url");
+										lrcUrl = "http://music.163.com/api/song/lyric?os=osx&id=" + id + "&lv=-1&kv=-1&tv=-1";
+										return url;
 									}
 								}
 								return "";
 							}
+
+							@Override
+							public String getLrcUrl() {
+								if(urlFound) {
+									return lrcUrl;
+								}
+								Map<String, Object> mMusic = JSONUtil.fromJson(this.url);
+								Object id = mMusic.get("id");
+								lrcUrl = "http://music.163.com/api/song/lyric?os=osx&id=" + id + "&lv=-1&kv=-1&tv=-1";
+								return lrcUrl;
+							}
 							
 						};
 						si.name = (String) song.get("name");
+						si.length = Long.parseLong(song.get("dt").toString()) * 1000;
 						List<Map<String, Object>> artists = (List<Map<String, Object>>) song.get("ar");
 						if(null != artists && artists.size() > 0) {
 							si.singer = (String) artists.get(0).get("name");
@@ -389,13 +443,53 @@ public class NetEasySource implements IDownloadSource {
 
 	@Override
 	public Map<String, String> fastSearch(String name) {
-		// TODO Auto-generated method stub
-		return Collections.emptyMap();
+		Map<String, String> rst = new HashMap<String, String>();
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("csrf_token", "");
+		params.put("type", "1");
+		params.put("s", name);
+		String json = JSONUtil.toJson(params);
+		Map<String, String> p = EncryptUtils.encrypt(json);
+		List<BasicNameValuePair> fromparams = new ArrayList<BasicNameValuePair>();
+		fromparams.add(new BasicNameValuePair("params", p.get("params")));
+		fromparams.add(new BasicNameValuePair("encSecKey", p.get("encSecKey")));
+		String url = "http://music.163.com/weapi/search/suggest/web";
+		String data = post(url, fromparams);
+		Map<String, Object> info = JSONUtil.fromJson(data);
+		if(null == info) {
+			return rst;
+		}
+		Map<String, Object> result = (Map<String, Object>) info.get("result");
+		if(null == result) {
+			return rst;
+		}
+		List<Map<String, Object>> songs = (List<Map<String, Object>>) result.get("songs");
+		if(null == songs) {
+			return rst;
+		}
+		for(Map<String, Object> song : songs) {
+			rst.put(song.get("name").toString(), song.get("name").toString());
+		}
+		return rst;
 	}
 
 	@Override
 	public String getArtist(String name) {
-		// TODO Auto-generated method stub
+		Map<String, Object> info = search(name, "100");
+		Map<String, Object> result = (Map<String, Object>) info.get("result");
+		if(null == result) {
+			return null;
+		}
+		List<Map<String, Object>> artists = (List<Map<String, Object>>) result.get("artists");
+		if(null == artists) {
+			return null;
+		}
+		for(Map<String, Object> map : artists) {
+			if(name.equals(map.get("name"))) {
+				return (String)map.get("picUrl");
+			}
+		}
+		System.out.println(JSONUtil.toJson(info));
 		return null;
 	}
 	

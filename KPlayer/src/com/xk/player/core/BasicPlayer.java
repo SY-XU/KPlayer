@@ -26,6 +26,7 @@ package com.xk.player.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -47,6 +49,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
 import javazoom.spi.PropertiesContainer;
 
 import org.tritonus.share.sampled.TAudioFormat;
@@ -97,39 +100,43 @@ public class BasicPlayer implements BasicController, Runnable {
 			
 			@Override
 			public void stateUpdated(BasicPlayerEvent event) {
-//				System.out.println();
+				System.out.println("updated : " + event.getCode());
 				
 			}
 			
 			@Override
 			public void setController(BasicController controller) {
-//				System.out.println();
+				System.out.println();
 				
 			}
 			
 			@Override
 			public void progress(int bytesread, long microseconds, byte[] pcmdata, Map<String,Object> properties) {
-				System.out.println(microseconds);
+				System.out.println("procesed : " + microseconds);
 				
 			}
 			
 			@Override
 			public void opened(Object stream, Map<String,Object> properties) {
-				System.out.println(properties.get("duration"));
+				System.out.println("duration : " + properties.get("audio.length.frames"));
 				
 			}
 		};
     	BasicPlayer player=new BasicPlayer();
     	player.addBasicPlayerListener(listener);
     	try {
-    		String url="http://win.web.ra01.sycdn.kuwo.cn/4ef64ca30113d15ecb12b423e8a56e0c/577e6864/resource/n2/192/92/78/1662312093.mp3";
-    		HTTPUtil l=HTTPUtil.getInstance("test");
-    		player.open(l.getInput(url));
-//			player.open(new File("e:/download/薛之谦 - 演员.mp3"));
+    		String urlStr = "E:/download/Alvin清风 - 凉凉.mp3";
+//    		String urlStr="http://m10.music.126.net/20171214161535/ee5613f24ac07068b0249ec3f2c6b130/ymusic/adcc/f230/c36c/74d40f2d3d738d5007f74f53ec458316.mp3";
+//    		URL url = new URL(urlStr);
+//    		player.open(url);
+			player.open(new File("E:\\download\\Alvin清风 - 凉凉.mp3"), new HashMap<String, Object>());
 			player.play();
 		} catch (BasicPlayerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+//		} catch (MalformedURLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		}
     }
 
@@ -241,33 +248,42 @@ public class BasicPlayer implements BasicController, Runnable {
     /**
      * Open file to play.
      */
-    public void open(File file) throws BasicPlayerException {
+    public void open(File file, Map<String, Object> properties) throws BasicPlayerException {
         log.info("open(" + file + ")");
         if (file != null) {
+        	if(null == properties) {
+        		properties = new HashMap<String, Object>();
+        	}
             m_dataSource = file;
-            initAudioInputStream();
+            initAudioInputStream(properties);
         }
     }
 
     /**
      * Open URL to play.
      */
-    public void open(URL url) throws BasicPlayerException {
+    public void open(URL url,Map<String, Object> properties) throws BasicPlayerException {
         log.info("open(" + url + ")");
         if (url != null) {
+        	if(null == properties) {
+        		properties = new HashMap<String, Object>();
+        	}
             m_dataSource = url;
-            initAudioInputStream();
+            initAudioInputStream(properties);
         }
     }
 
     /**
      * Open inputstream to play.
      */
-    public void open(InputStream inputStream) throws BasicPlayerException {
+    public void open(InputStream inputStream, Map<String, Object> properties) throws BasicPlayerException {
         log.info("open(" + inputStream + ")");
         if (inputStream != null) {
+        	if(null == properties) {
+        		properties = new HashMap<String, Object>();
+        	}
             m_dataSource = inputStream;
-            initAudioInputStream();
+            initAudioInputStream(properties);
         }
     }
 
@@ -275,7 +291,7 @@ public class BasicPlayer implements BasicController, Runnable {
      * Inits AudioInputStream and AudioFileFormat from the data source.
      * @throws BasicPlayerException
      */
-    protected void initAudioInputStream() throws BasicPlayerException {
+    protected void initAudioInputStream(Map<String, Object> properties) throws BasicPlayerException {
         try {
             reset();
             notifyEvent(BasicPlayerEvent.OPENING, getEncodedStreamPosition(), -1, m_dataSource);
@@ -288,15 +304,12 @@ public class BasicPlayer implements BasicController, Runnable {
             }
             createLine();
             // Notify listeners with AudioFileFormat properties.
-            Map<String,Object> properties = null;
             if (m_audioFileFormat instanceof TAudioFileFormat) {
                 // Tritonus SPI compliant audio file format.
-                properties = ((TAudioFileFormat) m_audioFileFormat).properties();
+                Map<String, Object> temp = ((TAudioFileFormat) m_audioFileFormat).properties();
                 // Clone the Map because it is not mutable.
-                properties = deepCopy(properties);
-            } else {
-                properties = new HashMap<String,Object>();
-            }
+                properties.putAll(temp);
+            } 
             // Add JavaSound properties.
             if (m_audioFileFormat.getByteLength() > 0) {
                 properties.put("audio.length.bytes", new Integer(m_audioFileFormat.getByteLength()));
@@ -547,7 +560,7 @@ public class BasicPlayer implements BasicController, Runnable {
      */
     protected void startPlayback() throws BasicPlayerException {
         if (m_status == STOPPED) {
-            initAudioInputStream();
+            initAudioInputStream(new HashMap<String, Object>());
         }
         if (m_status == OPENED) {
             log.info("startPlayback called");
@@ -705,7 +718,7 @@ public class BasicPlayer implements BasicController, Runnable {
             try {
                 synchronized (m_audioInputStream) {
                     notifyEvent(BasicPlayerEvent.SEEKING, getEncodedStreamPosition(), -1, null);
-                    initAudioInputStream();
+                    initAudioInputStream(new HashMap<String, Object>());
                     if (m_audioInputStream != null) {
                         // Loop until bytes are really skipped.
                         while (totalSkipped < (bytes - SKIP_INACCURACY_SIZE)) {

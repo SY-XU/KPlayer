@@ -1,0 +1,150 @@
+package com.xk.player.ui.items;
+
+import static com.xk.player.core.BasicPlayerEvent.PAUSED;
+import static com.xk.player.core.BasicPlayerEvent.PLAYING;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+
+import com.xk.player.core.BasicPlayer;
+import com.xk.player.core.BasicPlayerException;
+import com.xk.player.lrc.XRCLine;
+import com.xk.player.tools.Config;
+import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.SWTTools;
+import com.xk.player.tools.SongLocation;
+import com.xk.player.tools.SourceFactory;
+import com.xk.player.tools.WriteOnReadInputStream;
+import com.xk.player.tools.sources.IDownloadSource.SearchInfo;
+import com.xk.player.uilib.BaseBox;
+import com.xk.player.uilib.DelMusicComp;
+
+public class TryListenItem extends SongItem {
+	
+	private SearchInfo info;
+	
+	private File realFile = null;
+	private List<XRCLine> lrcs;
+
+	public TryListenItem(Map<String, String> property, SearchInfo info) {
+		super(property);
+		this.info = info;
+	}
+	
+	
+	
+	
+	@Override
+	public boolean oncliek(MouseEvent e, int itemHeight,int index) {
+		if(e.button==3){
+			Menu m=new Menu(getParent());
+			Menu menu=getParent().getMenu();
+			if (menu != null) {
+				menu.dispose();
+			}
+			MenuItem miPlay=new MenuItem(m, SWT.NONE);
+			miPlay.setText("播放");
+			miPlay.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					getParent().select(TryListenItem.this,false);
+				}
+				
+			});
+			
+			
+			MenuItem miDel = new MenuItem(m, SWT.NONE);
+			miDel.setText("删除");
+			miDel.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					BaseBox bb=new BaseBox(getParent().getShell(), SWT.NO_TRIM);
+					bb.getShell().setSize(300, 130);
+					SWTTools.centerWindow(bb.getShell());
+					DelMusicComp comp = new DelMusicComp(bb.getShell(), SWT.NONE);
+					comp.setTarget(TryListenItem.this);
+					bb.add(comp);
+					bb.open(0, 0);
+				}
+				
+			});
+			getParent().setMenu(m);
+			m.setVisible(true);
+		}
+		return true;
+	}
+
+
+
+
+	@Override
+	public void play(BasicPlayer player) throws BasicPlayerException {
+		if(null == realFile) {
+			String url = info.getUrl();
+			SongLocation loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+			if(null == loc) {
+				loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+			}
+			if(null == loc) {
+				throw new BasicPlayerException("can not download music");
+			}
+			int status = player.getStatus();
+			if(status == PLAYING || status == PAUSED){
+				try {
+					player.stop();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			Map<String, Object> property = new HashMap<String, Object>();
+			property.put("songitem", this);
+			property.put("duration", info.length);
+			try {
+				InputStream input = new WriteOnReadInputStream(loc.input, loc.length) {
+
+					@Override
+					public void onDownloadEnd(File file) {
+						realFile = file;
+						TryListenItem.this.put("path", file.getAbsolutePath());
+					}
+					
+				};
+				player.open(input, property);
+			} catch (IOException e) {
+				throw new BasicPlayerException("invalid input", e);
+			}
+		} else {
+			Map<String, Object> property = new HashMap<String, Object>();
+			property.put("songitem", this);
+			player.open(realFile, property);
+		}
+		
+		player.play();
+	}
+
+
+	@Override
+	public List<XRCLine> loadXrc(long allLength) {
+		if(null == lrcs) {
+			String lrcurl = info.getLrcUrl();
+			String html = HTTPUtil.getInstance("player").getHtml(lrcurl, info.headers);
+			lrcs = SourceFactory.getSource(Config.getInstance().downloadSource).parse(html);
+		}
+		return lrcs;
+	}
+
+}

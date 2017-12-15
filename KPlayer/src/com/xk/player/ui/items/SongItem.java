@@ -1,8 +1,12 @@
-package com.xk.player.ui;
+package com.xk.player.ui.items;
+
+import static com.xk.player.core.BasicPlayerEvent.PAUSED;
+import static com.xk.player.core.BasicPlayerEvent.PLAYING;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,18 +23,21 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 
+import com.xk.player.core.BasicPlayer;
+import com.xk.player.core.BasicPlayerException;
 import com.xk.player.lrc.XLrcMaker;
+import com.xk.player.lrc.XRCLine;
 import com.xk.player.tools.FileUtils;
 
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.player.tools.Config;
+import com.xk.player.tools.LRCFactory;
 import com.xk.player.tools.SWTTools;
-import com.xk.player.tools.SongSeacher;
-import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.tools.sources.IDownloadSource.SearchInfo;
 import com.xk.player.tools.SourceFactory;
+import com.xk.player.ui.SendMusic;
 import com.xk.player.uilib.BaseBox;
 import com.xk.player.uilib.DelMusicComp;
 import com.xk.player.uilib.ListItem;
@@ -40,14 +47,14 @@ import com.xk.player.uilib.SearchResultComp;
 
 public class SongItem extends ListItem {
 
-	private Map<String,String> property;
+	private Map<String,String> property = new HashMap<String, String>();
 	private int height=30;
 	private int selectedHeight=50;
 	private Image headDefault=SWTResourceManager.getImage(SongItem.class, "/images/head.png");
 	private Image head;
 	
 	public SongItem(Map<String,String> property){
-		this.property=property;
+		this.property.putAll(property);
 	}
 	
 	public void put(String key,String prop){
@@ -73,7 +80,7 @@ public class SongItem extends ListItem {
 	public void draw(GC gc, int start,int width,int index) {
 		String name=FileUtils.getLimitString(property.get("name"), 14);
 		Font font=SWTResourceManager.getFont("黑体", 10, SWT.NORMAL);
-		boolean hq=property.get("path").endsWith(".ape");
+		boolean hq = property.get("path").endsWith(".ape");
 		if(selected){
 			int alf=gc.getAlpha();
 			gc.setAlpha(55);
@@ -272,4 +279,27 @@ public class SongItem extends ListItem {
 		this.head = head;
 	}
 
+	public void play(BasicPlayer player) throws BasicPlayerException {
+		String path = getProperty().get("path");
+		File file = new File(path);
+		if(file.exists() && file.isFile()){
+			int status = player.getStatus();
+			if(status == PLAYING || status == PAUSED){
+				try {
+					player.stop();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			Map<String, Object> property = new HashMap<String, Object>();
+			property.put("songitem", this);
+			player.open(file, property);
+			player.play();
+		}
+	}
+	
+	public List<XRCLine> loadXrc(long allLength) {
+		return LRCFactory.fromFile(property.get("name"), allLength);
+	}
 }

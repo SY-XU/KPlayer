@@ -10,7 +10,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.xk.player.ui.SongItem;
+import com.xk.player.ui.items.SongItem;
+import com.xk.player.ui.items.TryListenItem;
 
 public class DelMusicComp extends Composite implements ICallable<Boolean>{
 
@@ -40,8 +41,10 @@ public class DelMusicComp extends Composite implements ICallable<Boolean>{
 			@Override
 			public void mouseUp(MouseEvent mouseevent) {
 				String file = target.getProperty().get("path");
-				if(chk.getSelection()) {
-					new File(file).delete();
+				if(!(target instanceof TryListenItem)) {
+					if(chk.getSelection()) {
+						new File(file).delete();
+					}
 				}
 				target.getParent().removeItem(target);
 				callBack.callback(null);

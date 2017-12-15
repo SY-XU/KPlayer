@@ -1,4 +1,4 @@
-package com.xk.player.tools;
+package com.xk.player.tools.sources;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -15,7 +15,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.xk.player.lrc.XRCLine;
-import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.JSONUtil;
+import com.xk.player.tools.LrcInfo;
+import com.xk.player.tools.LrcParser;
+import com.xk.player.tools.SongLocation;
 
 public class KuwoSource implements IDownloadSource {
 
@@ -62,7 +66,14 @@ public class KuwoSource implements IDownloadSource {
 			Document doc=Jsoup.parse(html);
 			Elements eles=doc.select("li[class=clearfix]");
 			for(Element ele:eles){
-				SearchInfo info=new SearchInfo();
+				SearchInfo info=new SearchInfo() {
+
+					@Override
+					public String getLrcUrl() {
+						return "";
+					}
+					
+				};
 				lrcs.add(info);
 				Elements names=ele.getElementsByAttributeValue("class", "m_name");
 				for(Element nameP:names){
@@ -114,9 +125,15 @@ public class KuwoSource implements IDownloadSource {
 									return this.url;
 								}
 								String mp4Url = "http://www.kuwo.cn/yy/st/mvurl?rid=MUSIC_" + this.url;
-								this.urlFound = true;
 								this.url = HTTPUtil.getInstance("search").getHtml(mp4Url);
+								this.flashVars.put("url", this.url);
+								this.urlFound = true;
 								return this.url;
+							}
+
+							@Override
+							public String getLrcUrl() {
+								return null;
 							}
 							
 						};
@@ -162,7 +179,7 @@ public class KuwoSource implements IDownloadSource {
 			Document doc=Jsoup.parse(html);
 			Elements eles=doc.select("li[class=clearfix]");
 			for(Element ele:eles){
-				SearchInfo info=new SearchInfo(){
+				SearchInfo info = new SearchInfo(){
 
 					@Override
 					public String getUrl() {
@@ -173,32 +190,38 @@ public class KuwoSource implements IDownloadSource {
 						this.url = HTTPUtil.getInstance("player").getHtml(this.url);
 						return this.url;
 					}
+
+					@Override
+					public String getLrcUrl() {
+						return this.lrcUrl;
+					}
 					
 				};
-				info.type=type;
+				info.type = type;
 				songs.add(info);
-				Elements names=ele.getElementsByAttributeValue("class", "m_name");
-				for(Element nameP:names){
-					Elements as=nameP.getElementsByTag("a");
-					for(Element a:as){
-						info.name=a.attr("title");
+				Elements names = ele.getElementsByAttributeValue("class", "m_name");
+				for(Element nameP : names){
+					Elements as = nameP.getElementsByTag("a");
+					for(Element a :as){
+						info.name = a.attr("title");
+						info.lrcUrl = a.attr("href");
 						break;
 					}
 					break;
 				}
-				Elements albums=ele.getElementsByAttributeValue("class", "a_name");
+				Elements albums = ele.getElementsByAttributeValue("class", "a_name");
 				for(Element albumP:albums){
-					Elements as=albumP.getElementsByTag("a");
-					for(Element a:as){
-						info.album=a.attr("title");
+					Elements as = albumP.getElementsByTag("a");
+					for(Element a : as){
+						info.album = a.attr("title");
 						break;
 					}
 					break;
 				}
-				Elements singers=ele.getElementsByAttributeValue("class", "s_name");
+				Elements singers = ele.getElementsByAttributeValue("class", "s_name");
 				for(Element singer:singers){
-					Elements as=singer.getElementsByTag("a");
-					for(Element a:as){
+					Elements as = singer.getElementsByTag("a");
+					for(Element a : as){
 						info.singer=a.attr("title");
 						break;
 					}

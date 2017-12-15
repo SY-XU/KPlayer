@@ -34,6 +34,7 @@ import com.xk.player.tools.LRCFactory;
 import com.xk.player.tools.LrcParser;
 import com.xk.player.tools.Util;
 import com.xk.player.ui.PlayUI;
+import com.xk.player.ui.items.SongItem;
 
 /**
  *
@@ -141,7 +142,7 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
      * @param g
      */
     private void update(Graphics2D g){
-    	if(nowTime==0){
+    	if(nowTime==0 || null == lines || lines.isEmpty()){
 			g.dispose();
 			return;
 		}
@@ -272,11 +273,9 @@ public class MyLyricPanel extends JPanel implements Runnable , BasicPlayerListen
 		cur=0;
 		pause(false);
 		Long allLength=(Long) properties.get("duration");
-		if(stream instanceof File){
-			File file=(File) stream;
-			String filename=file.getName();
-			String musicName = filename.substring(0, filename.lastIndexOf("."));
-			List<XRCLine> lines = LRCFactory.fromFile(musicName, allLength);
+		SongItem item = (SongItem) properties.get("songitem");
+		if(null != item){
+			List<XRCLine> lines = item.loadXrc(allLength);
 			if(null!=lines){
 				setLines(lines);
 			}

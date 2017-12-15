@@ -50,6 +50,8 @@ public class MyList extends Composite {
 	private int mask=0;//模糊背景
 	private boolean simpleSelect=false;//单击选中
 	
+	private boolean inited = false;
+	
 	/**
 	 * Create the composite.
 	 * @param parent
@@ -484,6 +486,14 @@ public class MyList extends Composite {
 		return items.size();
 	}
 	
+	public boolean isInited() {
+		return inited;
+	}
+
+	public void setInited(boolean inited) {
+		this.inited = inited;
+	}
+
 	private enum STATE{
 		NORMAL , DRAGING
 	}

@@ -317,7 +317,7 @@ public class XLrcMaker implements BasicPlayerListener {
 						player = new BasicPlayer();
 						player.addBasicPlayerListener(XLrcMaker.this);
 						try {
-							player.open(new File(path));
+							player.open(new File(path), new HashMap<String, Object>());
 							player.play();
 						} catch (BasicPlayerException e1) {
 							// TODO Auto-generated catch block

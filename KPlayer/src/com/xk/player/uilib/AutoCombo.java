@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.xk.player.tools.Config;
-import com.xk.player.tools.SongSeacher;
 import com.xk.player.tools.SourceFactory;
+import com.xk.player.tools.sources.SongSeacher;
 
 
 /**

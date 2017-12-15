@@ -49,8 +49,14 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongLocation;
-import com.xk.player.tools.SongSeacher;
-import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.tools.sources.SongSeacher;
+import com.xk.player.tools.sources.IDownloadSource.SearchInfo;
+import com.xk.player.ui.items.LTableItem;
+import com.xk.player.ui.items.MVSearchItem;
+import com.xk.player.ui.items.SongItem;
+import com.xk.player.ui.items.SongSearchItem;
+import com.xk.player.ui.items.TryListenItem;
+import com.xk.player.ui.items.TypeItem;
 import com.xk.player.ui.settings.SettingComp;
 import com.xk.player.uilib.AutoCombo;
 import com.xk.player.uilib.BaseBox;
@@ -82,10 +88,10 @@ public class PlayUI implements BasicPlayerListener{
 	private Jindutiao jindutiao;
 	private Jindutiao voice;
 	private Map<String,Object> audioInfo;
-	private MyList searchResult;;
-	private MyList list;
+	private MyList searchResult;
+	private MyList currentList;
+	private Map<ListItem, MyList> list = new HashMap<ListItem, MyList>();
 	private MyList types;
-	private int[]selections=new int[]{-1,-1};
 	private ReentrantLock lock;
 	private Condition cond;
 	public long jumpedMillan=0;
@@ -254,22 +260,39 @@ public class PlayUI implements BasicPlayerListener{
 		lengthLabel.setBounds(307, 49, 54, 17);
 		lengthLabel.setText("00:00");
 		
-		//歌曲列表
-		list=new MyList(shell, 315, 522);
-		list.setLocation(46, 111);
-		list.setMask(80);
-		
 		//分类列表
-		types=new MyList(shell,64,522);
+		types = new MyList(shell,46,522);
 		types.setLocation(0,111);
 		types.setSimpleSelect(true);
 		
-		Image music=SWTResourceManager.getImage(PlayUI.class, "/images/music.png");
-		Image heart=SWTResourceManager.getImage(PlayUI.class, "/images/heart.png");
-		TypeItem musics=new TypeItem(music);
+		Image music = SWTResourceManager.getImage(PlayUI.class, "/images/music.png");
+		Image heart = SWTResourceManager.getImage(PlayUI.class, "/images/heart.png");
+		Image trylisten = SWTResourceManager.getImage(PlayUI.class, "/images/trylisten.png");
+		TypeItem musics = new TypeItem(music);
 		types.addItem(musics);
+		
+		MyList musicList = new MyList(shell, 315, 522);
+		musicList.setLocation(46, 111);
+		musicList.setMask(80);
+		list.put(musics, musicList);
+		
 		TypeItem loved=new TypeItem(heart);
 		types.addItem(loved);
+		
+		MyList loveList = new MyList(shell, 315, 522);
+		loveList.setLocation(46, 111);
+		loveList.setMask(80);
+		loveList.setVisible(false);
+		list.put(loved, loveList);
+		
+		TypeItem listen=new TypeItem(trylisten);
+		types.addItem(listen);
+		
+		MyList tryList = new MyList(shell, 315, 522);
+		tryList.setLocation(46, 111);
+		tryList.setMask(80);
+		tryList.setVisible(false);
+		list.put(listen, tryList);
 		
 		//显示歌词
 		Image lrc=SWTResourceManager.getImage(PlayUI.class, "/images/lrc.png");
@@ -394,8 +417,8 @@ public class PlayUI implements BasicPlayerListener{
 		myLove.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent arg0) {
-				int index=types.getSelectIndex();
-				ListItem item=list.getSelection();
+				int index = types.getSelectIndex();
+				ListItem item = musicList.getSelection();
 				if(index==0 && null != item){
 					SongItem it=(SongItem) item;
 					String path=it.getProperty().get("path");
@@ -424,7 +447,8 @@ public class PlayUI implements BasicPlayerListener{
 				if(null!=path&&!path.isEmpty()){
 					addFile(path,true);
 				}
-				list.flush();
+				MyList select = list.get(types.getSelection());
+				select.flush();
 			}
 		});
 		
@@ -452,7 +476,8 @@ public class PlayUI implements BasicPlayerListener{
 						for(String path:mp3s){
 							addFile(dir+File.separator+path,true);
 						}
-						list.flush();
+						MyList select = list.get(types.getSelection());
+						select.flush();
 					}
 					
 				}
@@ -630,34 +655,43 @@ public class PlayUI implements BasicPlayerListener{
 			
 			@Override
 			public void selected(ItemSelectionEvent ev) {
-				int index=types.getSelectIndex();
-				list.clearAll();
-				if(index==0){
-					selections[1]=-1;
+				int index = types.getSelectIndex();
+				MyList selected = list.get(ev.item);
+				if(null == selected) {
+					return;
+				}
+				if(null != currentList) {
+					currentList.setVisible(false);
+				}
+				currentList = selected;
+				currentList.setVisible(true);
+				if(currentList.isInited()) {
+					return;
+				}
+				if(index == 0){
 					for(String path:Config.getInstance().songList){
 						addFile(path,true);
 					}
 					Display.getDefault().asyncExec(new Runnable() {
 						public void run() {
-							list.flush();
+							currentList.flush();
 						}
 					});
-				}else{
-					selections[0]=-1;
+				}else if(index == 1){
 					for(String path:Config.getInstance().favoriteList){
 						addFile(path,true);
 					}
 					Display.getDefault().asyncExec(new Runnable() {
 						public void run() {
-							list.flush();
+							currentList.flush();
 						}
 					});
 				}
-				
+				currentList.setInited(true);
 			}
 		});
 		
-		list.addItemListener(new ItemListener() {
+		ItemListener itemListener = new ItemListener() {
 			
 			@Override
 			public void itemRemove(ItemEvent e) {
@@ -665,16 +699,25 @@ public class PlayUI implements BasicPlayerListener{
 				removeFile(item.getProperty().get("path"));
 				
 			}
-		});
+		};
 		
-		list.add(new ItemSelectionListener() {
+		musicList.addItemListener(itemListener);
+		loveList.addItemListener(itemListener);
+		tryList.addItemListener(itemListener);
+		
+		ItemSelectionListener selectListener = new ItemSelectionListener() {
 			
 			@Override
 			public void selected(ItemSelectionEvent ev) {
 				processItemSelection(ev);
 				
 			}
-		});
+		};
+		
+		musicList.add(selectListener);
+		loveList.add(selectListener);
+		tryList.add(selectListener);
+		
 		types.select(0, false);
 		createPlayer();
 	}
@@ -682,7 +725,7 @@ public class PlayUI implements BasicPlayerListener{
 	/**
 	 * 歌词和搜索切换
 	 * @param show
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void showLrcView(int num){
 		Image lrcpic=SWTResourceManager.getImage(PlayUI.class, "/images/lrcpic.png");
@@ -719,30 +762,25 @@ public class PlayUI implements BasicPlayerListener{
 		mvword.redraw();
 	}
 	
-	public void playMv(String url) {
+	public void playMv(SearchInfo info) {
 		showLrcView(3);
-		Map<String, String> vars = new HashMap<String, String>();
-		vars.put("skinurl", "http://static.kgimg.com/common/swf/video/skin.swf");
-		vars.put("aspect", "true");
-		vars.put("autoplay", "true");
-		vars.put("fullscreen", "true");
-		vars.put("initfun", "flashinit");
-		vars.put("url", url);
+		Map<String, String> vars = info.flashVars;
 		String varsStr = "";
 		for(String key : vars.keySet()) {
 			varsStr += key + "=" + vars.get(key) + "&";
 		}
 		flash.setFlashVars(varsStr);
 		flash.setQuality2("high");
-		flash.setBGColor("#666666");
-		flash.setWMode("Transparent");
-		flash.loadMovie(0, "http://static.kgimg.com/common/swf/video/videoPlayer.swf?20141014061415");
+		flash.setBGColor("#000000");
+		flash.setWMode("transparent");
+		flash.loadMovie(0, info.swfUrl);
 	}
+	
 	
 	/**
 	 * 搜索
 	 * 
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void processSearch(){
 		String name=text.getText();
@@ -784,17 +822,24 @@ public class PlayUI implements BasicPlayerListener{
 	/**
 	 * 双击播放
 	 * @param ev
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void processItemSelection(ItemSelectionEvent ev) {
-		currentPlay=types.getSelectIndex();
+		int index = types.getSelectIndex();
+		System.out.println("types selection : " + index + ",current index : " + currentPlay);
+		if(index != currentPlay) {
+			MyList last = list.get(types.getItems().get(currentPlay));
+			if(null != last && null != last.getSelection()) {
+				last.getSelection().unSelect();
+			}
+			currentPlay = index;
+		}
 		final SongItem item=(SongItem) ev.item;
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				songName.setText(item.getProperty().get("name"));
 			}
 		});
-		selections[types.getSelectIndex()]=list.getSelectIndex();
 		lock.lock();
 		try {
 			cond.signalAll();
@@ -840,7 +885,7 @@ public class PlayUI implements BasicPlayerListener{
 	/**
 	 * 删除文件
 	 * @param path
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void removeFile(String path){
 		int tps=types.getSelectIndex();
@@ -851,22 +896,42 @@ public class PlayUI implements BasicPlayerListener{
 		}
 	}
 	
+	
+	public void addTryListen(SearchInfo info) {
+		Map<String,String> property = new HashMap<String, String>();
+		property.put("artist", info.singer);
+		property.put("path", info.getUrl());
+		property.put("name", info.name);
+		TryListenItem item = new TryListenItem(property, info);
+		MyList ml = list.get(types.getItems().get(2));
+		if(null != ml) {
+			ml.addItem(item);
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					ml.flush();
+				}
+			});
+		}
+	}
+	
 	/**
 	 * 添加单个文件
 	 * @param path
 	 * @param sync
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	public void addFile(String path,boolean sync){
-		int tps=types.getSelectIndex();
-		if(tps==0){
+		int tps = types.getSelectIndex();
+		if(tps == 0){
 			if(!Config.getInstance().songList.contains(path)){
 				Config.getInstance().songList.add(path);
 			}
-		}else{
+		}else if(tps == 1){
 			if(!Config.getInstance().favoriteList.contains(path)){
 				Config.getInstance().favoriteList.add(path);
 			}
+		} else {
+			return;
 		}
 		File file=new File(path);
 		if(file.exists()&&file.isFile()){
@@ -884,14 +949,11 @@ public class PlayUI implements BasicPlayerListener{
 			pro.put("name", name.substring(0, name.lastIndexOf(".")));
 			pro.put("path", path);
 			SongItem item=new SongItem(pro);
-			list.addItem(item);
-			if(list.getItemCount()-1==selections[tps]){
-				item.select();
-			}
+			currentList.addItem(item);
 			if(!sync){
 				Display.getDefault().asyncExec(new Runnable() {
 					public void run() {
-						list.flush();
+						currentList.flush();
 					}
 				});
 				
@@ -902,7 +964,7 @@ public class PlayUI implements BasicPlayerListener{
 	/**
 	 * 循环播放
 	 * 
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void loop(){
 		new Thread(new Runnable() {
@@ -910,24 +972,32 @@ public class PlayUI implements BasicPlayerListener{
 			@Override
 			public void run() {
 				while(!closed){
-					playMusic();
+					try {
+						playMusic();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						System.out.println("play loop exception");
+					}
 				}
 				
 			}
-		}).start();
+		}, "play-loop").start();
 	}
 	
 	/**
 	 * 下一曲
 	 * 
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	public void playNext(){
-		if(currentPlay!=types.getSelectIndex()){
+		if(currentPlay != types.getSelectIndex()){
 			types.select(currentPlay, true);
 		}
-		int now=list.getSelectIndex();
-		int size=list.getItemCount();
+		System.out.println("playnext : currentPlay = " + currentPlay);
+		MyList current = list.get(types.getItems().get(currentPlay));
+		int now=current.getSelectIndex();
+		int size=current.getItemCount();
 		if(pModel==0){
 			if(++now>=size){
 				now=0;
@@ -936,13 +1006,13 @@ public class PlayUI implements BasicPlayerListener{
 			now= new Random().nextInt(size);
 		}
 		
-		list.select(now,true);
+		current.select(now,true);
 	}
 	
 	/**
 	 * 播放
 	 * 
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void playMusic(){
 		lock.lock();
@@ -953,33 +1023,19 @@ public class PlayUI implements BasicPlayerListener{
 		}finally{
 			lock.unlock();
 		}
-		ListItem focus=list.getFocus();
-		ListItem selected=list.getSelection();
-		if(null==selected&&null!=focus){
-			list.select(focus, true);
-			selected=list.getSelection(); 
+		ListItem focus = currentList.getFocus();
+		ListItem selected = currentList.getSelection();
+		if(null == selected && null != focus){
+			currentList.select(focus, true);
+			selected = currentList.getSelection(); 
 		}
-		String path="";
-		if(null!=selected){
-			SongItem item=(SongItem) selected;
-			path=item.getProperty().get("path");
-			File file=new File(path);
-			if(file.exists()&&file.isFile()){
-				int status=player.getStatus();
-				if(status==PLAYING||status==PAUSED){
-					try {
-						player.stop();
-					} catch (BasicPlayerException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-				try {
-					player.open(file);
-					player.play();
-				} catch (Exception e1) {
-					playNext();
-				}
+		if(null != selected){
+			SongItem item = (SongItem) selected;
+			try {
+				item.play(player);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				playNext();
 			}
 		}
 		
@@ -988,7 +1044,7 @@ public class PlayUI implements BasicPlayerListener{
 	/**
 	 * 拖拽回调
 	 * @param rate
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	protected void processSeek(double rate) {
         try {
@@ -1013,7 +1069,7 @@ public class PlayUI implements BasicPlayerListener{
 	/**
 	 * 创建播放器
 	 * 
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void createPlayer(){
 		player=new BasicPlayer();
@@ -1035,11 +1091,11 @@ public class PlayUI implements BasicPlayerListener{
 	 */
 	@Override
 	public void opened(Object stream, Map<String,Object> properties) {
-		lrcOffset=0;
-		jumpedMillan=0;
-		timeNow=0;
-		audioInfo=properties;
-		final long all="Monkey's Audio (ape)".equals(properties.get("audio.type"))?(Long) properties.get("duration"):(Long) properties.get("duration")/1000;
+		lrcOffset = 0;
+		jumpedMillan = 0;
+		timeNow = 0;
+		audioInfo = properties;
+		final long all = "Monkey's Audio (ape)".equals(properties.get("audio.type")) ? (Long) properties.get("duration") : (Long) properties.get("duration") / 1000;
 		jindutiao.setAll( (all));
 		jindutiao.setPersent(0d,true);
 		Display.getDefault().asyncExec(new Runnable() {
@@ -1048,8 +1104,8 @@ public class PlayUI implements BasicPlayerListener{
 			public void run() {
 				lengthLabel.setText(long2Seconds(all));
 				timeLabel.setText("00:00");
-				SongItem itm=(SongItem) list.getSelection();
-				if(null!=itm){
+				SongItem itm = (SongItem) currentList.getSelection();
+				if(null != itm){
 					itm.put("all", long2Seconds(all));
 				}
 			}
@@ -1069,10 +1125,10 @@ public class PlayUI implements BasicPlayerListener{
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					timeLabel.setText(long2Seconds(realTime));
-					SongItem itm=(SongItem) list.getSelection();
+					SongItem itm=(SongItem) currentList.getSelection();
 					if(null!=itm){
 						itm.put("now", long2Seconds(realTime));
-						list.flush();
+						currentList.flush();
 					}
 					
 				}
@@ -1141,7 +1197,7 @@ public class PlayUI implements BasicPlayerListener{
 	 * 转化时间
 	 * @param time
 	 * @return
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private String long2Seconds(long time){
 		long sec=time/1000;

@@ -1,4 +1,4 @@
-package com.xk.player.ui;
+package com.xk.player.ui.items;
 
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.GC;
@@ -30,7 +30,7 @@ public class TypeItem extends ListItem {
 			gc.setAlpha(alf);
 		}
 		if(null!=back){
-			gc.drawImage(back, (width-35)/2-8, start+(height-35)/2);
+			gc.drawImage(back, (width-35)/2, start+(height-35)/2);
 		}
 
 	}

@@ -2,7 +2,7 @@ package com.xk.player.lrc;
 
 /**
  * 单个歌词
- * @author o-kui.xiao
+ * @author xiaokui
  *
  */
 public class XRCNode {

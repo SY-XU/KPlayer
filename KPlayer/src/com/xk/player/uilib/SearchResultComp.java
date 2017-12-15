@@ -3,7 +3,6 @@ package com.xk.player.uilib;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -13,15 +12,13 @@ import com.xk.player.tools.Config;
 import com.xk.player.tools.FileUtils;
 import com.xk.player.tools.HTTPUtil;
 import com.xk.player.tools.JSONUtil;
-import com.xk.player.tools.LrcInfo;
 import com.xk.player.tools.SourceFactory;
 
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.xk.player.tools.SongSeacher;
-import com.xk.player.tools.SongSeacher.SearchInfo;
-import com.xk.player.ui.LTableItem;
+import com.xk.player.tools.sources.IDownloadSource.SearchInfo;
 import com.xk.player.ui.PlayUI;
+import com.xk.player.ui.items.LTableItem;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -119,7 +116,7 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 				@Override
 				public void run() {
 					String url=info.getUrl();
-					String html=HTTPUtil.getInstance("player").getHtml(url);
+					String html=HTTPUtil.getInstance("player").getHtml(url, info.headers);
 					persent=30;
 					flush();
 					try {

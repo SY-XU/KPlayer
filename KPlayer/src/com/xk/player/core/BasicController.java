@@ -26,6 +26,7 @@ package com.xk.player.core;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * This interface defines player controls available.  
@@ -37,21 +38,21 @@ public interface BasicController {
      * @param in
      * @throws BasicPlayerException
      */
-    public void open(InputStream in) throws BasicPlayerException;
+    public void open(InputStream in, Map<String, Object> properties) throws BasicPlayerException;
 
     /**
      * Open file to play.
      * @param file
      * @throws BasicPlayerException
      */
-    public void open(File file) throws BasicPlayerException;
+    public void open(File file, Map<String, Object> properties) throws BasicPlayerException;
 
     /**
      * Open URL to play.
      * @param url
      * @throws BasicPlayerException
      */
-    public void open(URL url) throws BasicPlayerException;
+    public void open(URL url, Map<String, Object> properties) throws BasicPlayerException;
 
     /**
      * Skip bytes.

@@ -32,6 +32,7 @@ import com.xk.player.tools.JSONUtil;
 import com.xk.player.tools.KrcText;
 import com.xk.player.tools.LRCFactory;
 import com.xk.player.tools.LrcParser;
+import com.xk.player.ui.items.SongItem;
 
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -271,9 +272,9 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 		cur=0;
 	}
 
-	public void loadLrc(File file) {
-		songName =file.getName().substring(0, file.getName().lastIndexOf("."));
-		setLines(LRCFactory.fromFile(songName, allLength));
+	public void loadLrc(SongItem item) {
+		songName = item.getProperty().get("name");
+		setLines(item.loadXrc(allLength));
 	}
 	
 	@Override
@@ -283,9 +284,9 @@ public class NormalWord extends Canvas implements PaintListener,BasicPlayerListe
 		cur=0;
 		pause(false);
 		allLength= ("Monkey's Audio (ape)".equals(properties.get("audio.type"))?(Long)properties.get("duration")*1000L:(Long)properties.get("duration"));
-		if(stream instanceof File){
-			File file=(File) stream;
-			loadLrc(file);
+		SongItem item = (SongItem) properties.get("songitem");
+		if(null != item){
+			loadLrc(item);
 		}
 	}
 

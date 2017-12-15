@@ -1,5 +1,11 @@
 package com.xk.player.tools;
 
+import com.xk.player.tools.sources.IDownloadSource;
+import com.xk.player.tools.sources.KugouSource;
+import com.xk.player.tools.sources.KuwoSource;
+import com.xk.player.tools.sources.NetEasySource;
+import com.xk.player.tools.sources.QierSource;
+
 public class SourceFactory {
 
 	
@@ -10,6 +16,8 @@ public class SourceFactory {
 			return new KugouSource();
 		} else if("ne".equals(name)) {
 			return new NetEasySource();
+		} else if("qier".equals(name)) {
+			return new QierSource();
 		}
 		return null;
 	}

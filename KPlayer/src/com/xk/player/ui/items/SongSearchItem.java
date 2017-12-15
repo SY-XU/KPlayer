@@ -1,20 +1,58 @@
-package com.xk.player.ui;
+package com.xk.player.ui.items;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+
 import com.xk.player.tools.Config;
-import com.xk.player.tools.HTTPUtil;
 import com.xk.player.tools.SongLocation;
-import com.xk.player.tools.SongSeacher.SearchInfo;
+import com.xk.player.tools.sources.IDownloadSource.SearchInfo;
 import com.xk.player.tools.SourceFactory;
+import com.xk.player.ui.PlayUI;
 
 public class SongSearchItem extends LTableItem {
 
 	public SongSearchItem(SearchInfo info) {
 		super(info);
 	}
+
+	
+	
+	
+	@Override
+	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
+		//右键菜单
+		if(e.button == 3) {
+			Menu m=new Menu(getParent());
+			Menu menu=getParent().getMenu();
+			if (menu != null) {
+				menu.dispose();
+			}
+			MenuItem miPlay=new MenuItem(m, SWT.NONE);
+			miPlay.setText("试听");
+			miPlay.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					PlayUI.getInstance().addTryListen(info);
+				}
+				
+			});
+			getParent().setMenu(m);
+			m.setVisible(true);
+		}
+		return super.oncliek(e, itemHeight, index);
+	}
+
+
+
 
 	@Override
 	protected void download() {
@@ -29,6 +67,14 @@ public class SongSearchItem extends LTableItem {
 				Config conf = Config.getInstance();
 				String url = info.getUrl();
 				SongLocation loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+				if(null == loc) {
+					loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+				}
+				if(null == loc) {
+					downloading=false;
+					flush();
+					return;
+				}
 				String parent = conf.downloadPath;
 				if(null == parent || parent.trim().isEmpty()){
 					parent = "e:/download";

@@ -1,0 +1,202 @@
+package com.xk.player.tools;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.commons.logging.impl.AvalonLogger;
+
+public abstract class WriteOnReadInputStream extends InputStream {
+
+	private static final String TEMP_DIR = "try_temp";
+	private long available = 0;
+	private RandomAccessFile raf;
+	private InputStream source;
+	private MappedByteBuffer read;
+	private MappedByteBuffer write;
+	private long buffered = 0;
+	private long bufferLimit = 40960l;
+	private long markPoint = 0;
+	private long markLimit = 0;
+	private long length;
+	private boolean closed = false;
+	private ReentrantLock lock;
+	private Condition cond;
+	
+	
+	public WriteOnReadInputStream(InputStream source, long length) throws IOException {
+		if(null == source) {
+			throw new NullPointerException("source is null");
+		}
+		this.source = source;
+		this.length = length;
+		this.available = length;
+		lock = new ReentrantLock();
+		cond = lock.newCondition();
+		init(length);
+	}
+	
+	/**
+	 * 初始化数据
+	 * @param available
+	 * @throws IOException
+	 * @author kui.xiao
+	 */
+	private void init(long available) throws IOException {
+		File file = new File(TEMP_DIR);
+		if(!file.exists()) {
+			file.mkdirs();
+		}
+		File target = new File(file, "music" + System.currentTimeMillis() + ".xtemp");
+		target.createNewFile();
+		target.deleteOnExit();
+		raf = new RandomAccessFile(target, "rw");
+		FileChannel fc = raf.getChannel();
+		read = fc.map(FileChannel.MapMode.READ_WRITE, 0, available);
+		write = fc.map(FileChannel.MapMode.READ_WRITE, 0, available);
+		bufferData(target);
+	}
+	
+	
+	
+	@Override
+	public int read(byte[] b) throws IOException {
+		return read(b, 0, b.length);
+	}
+
+	@Override
+	public synchronized int read(byte[] b, int off, int len) throws IOException {
+		if(read.position() + len > buffered && buffered < length){
+			lock.lock();
+			try {
+				System.out.println("try lock");
+				cond.await(100 * 1000, TimeUnit.MILLISECONDS);
+				System.out.println("read unlocked");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				throw new IOException("await failed!", e);
+			}finally{
+				lock.unlock();
+			}
+		}
+		if(null == b){
+			throw new IOException("buffer is null!");
+		}
+		if(len > available){
+			len = available();
+		}
+		read.get(b, off, len);
+		available -= len;
+		return len;
+	}
+
+	@Override
+	public long skip(long pos) throws IOException {
+		if(pos <= 0|| pos > available()){
+			return 0;
+		}
+		read.position(read.position() + (int)pos);
+		return pos;
+	}
+
+	@Override
+	public int available() throws IOException {
+		if(closed) {
+			return -1;
+		}
+		return (int) available;
+	}
+
+	@Override
+	public void close() throws IOException {
+		this.raf.close();
+		super.close();
+		this.closed = true;
+	}
+
+	@Override
+	public synchronized void mark(int readlimit) {
+		this.markPoint = read.position();
+		this.markLimit = readlimit;
+	}
+
+	@Override
+	public synchronized void reset() throws IOException {
+		int readPosition = read.position();
+		if(readPosition - markPoint > markLimit || readPosition < markPoint) {
+			return;
+		}
+		read.position((int) markPoint);
+	}
+
+	@Override
+	public boolean markSupported() {
+		return true;
+	}
+
+	private void bufferData(File target) {
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				byte[] buffer = new byte[20480];
+				int len = 0;
+				try {
+					while(!closed && (len = source.read(buffer, 0, buffer.length))>= 0) {
+						buffered += len;
+						if(buffered - read.position() > bufferLimit) {
+							lock.lock();
+							try {
+								cond.signalAll();
+							} catch (Exception e) {
+								
+							}finally{
+								lock.unlock();
+							}
+						}
+						write.put(buffer, 0, len);
+					}
+					if(!closed) {
+						onDownloadEnd(target);
+					}
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+					try {
+						close();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				} finally {
+					try {
+						source.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				
+			}
+		}).start();
+	}
+	
+	
+	@Override
+	public int read() throws IOException {
+		byte[] buffer = new byte[1];
+		if(read(buffer) == 1) {
+			return buffer[0];
+		}
+		return -1;
+	}
+
+	public abstract void onDownloadEnd(File file);
+	
+}

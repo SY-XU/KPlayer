@@ -89,10 +89,15 @@ public class HTTPUtil {
 		return getHtml(url);
 	}
 	
-	public String getHtml(String url){
+	public String getHtml(String url, Header[] hs) {
 		StringBuffer result=new StringBuffer();
 		try {
 			HttpGet httppost = new HttpGet(url);  
+			if(null != hs) {
+				for(Header header : hs) {
+					httppost.addHeader(header);
+				}
+			}
 			httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
 			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(2000).setConnectTimeout(2000).build();//设置请求和传输超时时间
 			httppost.setConfig(requestConfig);
@@ -131,6 +136,10 @@ public class HTTPUtil {
 			return null;
 		}
 		return result.toString();
+	}
+	
+	public String getHtml(String url){
+		return getHtml(url, new Header[]{} );
 	}
 	
 	public InputStream getInput(String url){
