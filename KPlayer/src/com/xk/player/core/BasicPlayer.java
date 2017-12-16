@@ -81,6 +81,7 @@ public class BasicPlayer implements BasicController, Runnable {
     private int lineBufferSize = -1;
     private long threadSleep = -1;
     private static Logger log = Logger.getLogger(BasicPlayer.class.getName());
+    private Map<String, Object> properties = new HashMap<String, Object>();
     /**
      * These variables are used to distinguish stopped, paused, playing states.
      * We need them to control Thread.
@@ -251,11 +252,12 @@ public class BasicPlayer implements BasicController, Runnable {
     public void open(File file, Map<String, Object> properties) throws BasicPlayerException {
         log.info("open(" + file + ")");
         if (file != null) {
-        	if(null == properties) {
-        		properties = new HashMap<String, Object>();
+        	if(null != properties) {
+        		this.properties.clear();
+        		this.properties.putAll(properties);
         	}
             m_dataSource = file;
-            initAudioInputStream(properties);
+            initAudioInputStream();
         }
     }
 
@@ -265,11 +267,12 @@ public class BasicPlayer implements BasicController, Runnable {
     public void open(URL url,Map<String, Object> properties) throws BasicPlayerException {
         log.info("open(" + url + ")");
         if (url != null) {
-        	if(null == properties) {
-        		properties = new HashMap<String, Object>();
+        	if(null != properties) {
+        		this.properties.clear();
+        		this.properties.putAll(properties);
         	}
             m_dataSource = url;
-            initAudioInputStream(properties);
+            initAudioInputStream();
         }
     }
 
@@ -279,11 +282,12 @@ public class BasicPlayer implements BasicController, Runnable {
     public void open(InputStream inputStream, Map<String, Object> properties) throws BasicPlayerException {
         log.info("open(" + inputStream + ")");
         if (inputStream != null) {
-        	if(null == properties) {
-        		properties = new HashMap<String, Object>();
+        	if(null != properties) {
+        		this.properties.clear();
+        		this.properties.putAll(properties);
         	}
             m_dataSource = inputStream;
-            initAudioInputStream(properties);
+            initAudioInputStream();
         }
     }
 
@@ -291,10 +295,11 @@ public class BasicPlayer implements BasicController, Runnable {
      * Inits AudioInputStream and AudioFileFormat from the data source.
      * @throws BasicPlayerException
      */
-    protected void initAudioInputStream(Map<String, Object> properties) throws BasicPlayerException {
+    protected void initAudioInputStream() throws BasicPlayerException {
         try {
             reset();
             notifyEvent(BasicPlayerEvent.OPENING, getEncodedStreamPosition(), -1, m_dataSource);
+            System.out.println("init stream ....");
             if (m_dataSource instanceof URL) {
                 initAudioInputStream((URL) m_dataSource);
             } else if (m_dataSource instanceof File) {
@@ -302,6 +307,7 @@ public class BasicPlayer implements BasicController, Runnable {
             } else if (m_dataSource instanceof InputStream) {
                 initAudioInputStream((InputStream) m_dataSource);
             }
+            System.out.println("init stream over ....");
             createLine();
             // Notify listeners with AudioFileFormat properties.
             if (m_audioFileFormat instanceof TAudioFileFormat) {
@@ -312,7 +318,7 @@ public class BasicPlayer implements BasicController, Runnable {
             } 
             // Add JavaSound properties.
             if (m_audioFileFormat.getByteLength() > 0) {
-                properties.put("audio.length.bytes", new Integer(m_audioFileFormat.getByteLength()));
+                properties.put("audio.length.bytes", new Long(m_audioFileFormat.getByteLength()));
             }
             if (m_audioFileFormat.getFrameLength() > 0) {
                 properties.put("audio.length.frames", new Integer(m_audioFileFormat.getFrameLength()));
@@ -560,7 +566,7 @@ public class BasicPlayer implements BasicController, Runnable {
      */
     protected void startPlayback() throws BasicPlayerException {
         if (m_status == STOPPED) {
-            initAudioInputStream(new HashMap<String, Object>());
+            initAudioInputStream();
         }
         if (m_status == OPENED) {
             log.info("startPlayback called");
@@ -718,7 +724,7 @@ public class BasicPlayer implements BasicController, Runnable {
             try {
                 synchronized (m_audioInputStream) {
                     notifyEvent(BasicPlayerEvent.SEEKING, getEncodedStreamPosition(), -1, null);
-                    initAudioInputStream(new HashMap<String, Object>());
+                    initAudioInputStream();
                     if (m_audioInputStream != null) {
                         // Loop until bytes are really skipped.
                         while (totalSkipped < (bytes - SKIP_INACCURACY_SIZE)) {
@@ -726,7 +732,7 @@ public class BasicPlayer implements BasicController, Runnable {
                             if (skipped == 0) {
                                 break;
                             }
-                            totalSkipped = totalSkipped + skipped;
+                            totalSkipped += skipped;
                             log.fine("Skipped : " + totalSkipped + "/" + bytes);
                             if (totalSkipped == -1) {
                                 throw new BasicPlayerException(BasicPlayerException.SKIPNOTSUPPORTED);

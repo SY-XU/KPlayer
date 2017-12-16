@@ -92,27 +92,33 @@ public class TryListenItem extends SongItem {
 
 	@Override
 	public void play(BasicPlayer player) throws BasicPlayerException {
+		//先关闭上一次的 
+		int status = player.getStatus();
+		if(status == PLAYING || status == PAUSED){
+			try { 
+				player.stop();
+			} catch (BasicPlayerException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 		if(null == realFile) {
 			String url = info.getUrl();
+			System.out.println("try load input stream ");
 			SongLocation loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
 			if(null == loc) {
+				System.out.println("retry load input stream!");
 				loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
 			}
-			if(null == loc) {
+			if(null == loc || loc.length == 0) {
+				System.out.println("input stream load failed!");
 				throw new BasicPlayerException("can not download music");
 			}
-			int status = player.getStatus();
-			if(status == PLAYING || status == PAUSED){
-				try {
-					player.stop();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
+			System.out.println("input stream load success");
 			Map<String, Object> property = new HashMap<String, Object>();
 			property.put("songitem", this);
 			property.put("duration", info.length);
+			property.put("audio.length.bytes", loc.length);
 			try {
 				InputStream input = new WriteOnReadInputStream(loc.input, loc.length) {
 

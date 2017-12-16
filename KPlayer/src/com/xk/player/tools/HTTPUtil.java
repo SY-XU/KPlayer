@@ -182,30 +182,30 @@ public class HTTPUtil {
 			HttpGet httppost = new HttpGet(url);  
 			httppost.addHeader("Connection", "keep-alive");
 			httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
-			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(2000).setConnectTimeout(2000).build();//设置请求和传输超时时间
+			RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(3000).setSocketTimeout(2000).setConnectTimeout(2000).build();//设置请求和传输超时时间
 			httppost.setConfig(requestConfig);
 			CloseableHttpResponse response = httpClient.execute(httppost);  
-			if(302==response.getStatusLine().getStatusCode()){
-				Header[] headers=response.getHeaders("Location");
+			if(302 == response.getStatusLine().getStatusCode()){
+				Header[] headers = response.getHeaders("Location");
 				response.close();
-				if(null!=headers&&headers.length>0){
-					Header header=headers[0];
-					String redirect=header.getValue();
+				if(null != headers && headers.length>0){
+					Header header = headers[0];
+					String redirect = header.getValue();
 					HttpPost httppost1 = new HttpPost(redirect);  
-					CloseableHttpResponse response1=httpClient.execute(httppost1);  
+					CloseableHttpResponse response1 = httpClient.execute(httppost1);  
 					HttpEntity entity = response1.getEntity();  
-			    	SongLocation location=new SongLocation();
-			    	location.length=entity.getContentLength();
-			    	location.input=entity.getContent();
+			    	SongLocation location = new SongLocation();
+			    	location.length = entity.getContentLength();
+			    	location.input = entity.getContent();
 			    	response1.close();
 			    	return location;
 				}
 				return null;
 			}else{
 				HttpEntity entity = response.getEntity();  
-				SongLocation location=new SongLocation();
-		    	location.length=entity.getContentLength();
-		    	location.input=entity.getContent();
+				SongLocation location = new SongLocation();
+		    	location.length = entity.getContentLength();
+		    	location.input = entity.getContent();
 				return location;
 			}
 			

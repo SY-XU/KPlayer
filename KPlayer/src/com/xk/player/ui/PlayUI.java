@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -697,6 +699,9 @@ public class PlayUI implements BasicPlayerListener{
 			public void itemRemove(ItemEvent e) {
 				SongItem item=(SongItem) e.item;
 				removeFile(item.getProperty().get("path"));
+				if(item.isSelected()) {
+					playNext();
+				}
 				
 			}
 		};
@@ -889,9 +894,9 @@ public class PlayUI implements BasicPlayerListener{
 	 */
 	private void removeFile(String path){
 		int tps=types.getSelectIndex();
-		if(tps==0){
+		if(tps == 0){
 			Config.getInstance().songList.remove(path);
-		}else{
+		}else if(tps == 1){
 			Config.getInstance().favoriteList.remove(path);
 		}
 	}
@@ -901,7 +906,7 @@ public class PlayUI implements BasicPlayerListener{
 		Map<String,String> property = new HashMap<String, String>();
 		property.put("artist", info.singer);
 		property.put("path", info.getUrl());
-		property.put("name", info.name);
+		property.put("name", info.singer + " - " + info.name);
 		TryListenItem item = new TryListenItem(property, info);
 		MyList ml = list.get(types.getItems().get(2));
 		if(null != ml) {
@@ -996,6 +1001,9 @@ public class PlayUI implements BasicPlayerListener{
 		}
 		System.out.println("playnext : currentPlay = " + currentPlay);
 		MyList current = list.get(types.getItems().get(currentPlay));
+		if(current.getItemCount() == 0) {
+			return;
+		}
 		int now=current.getSelectIndex();
 		int size=current.getItemCount();
 		if(pModel==0){
@@ -1017,7 +1025,9 @@ public class PlayUI implements BasicPlayerListener{
 	private void playMusic(){
 		lock.lock();
 		try {
+			System.out.println("play lock awaiting...");
 			cond.await();
+			System.out.println("play lock unlocked...");
 		} catch (InterruptedException e) {
 			return;
 		}finally{
@@ -1035,7 +1045,15 @@ public class PlayUI implements BasicPlayerListener{
 				item.play(player);
 			} catch (Exception e1) {
 				e1.printStackTrace();
-				playNext();
+				new Timer().schedule(new TimerTask(){
+
+					@Override
+					public void run() {
+						playNext();
+					}
+					
+				}, 500);
+				
 			}
 		}
 		
@@ -1051,12 +1069,12 @@ public class PlayUI implements BasicPlayerListener{
             if ((audioInfo != null) && (audioInfo.containsKey("audio.type"))) {
                 String type = (String) audioInfo.get("audio.type");
                 if ((type.equalsIgnoreCase("mp3")) && (audioInfo.containsKey("audio.length.bytes"))) {
-                    long skipBytes = Math.round(((Integer) audioInfo.get("audio.length.bytes")).intValue() * rate);
+                    long skipBytes = Math.round(((Long) audioInfo.get("audio.length.bytes")).longValue() * rate);
                     player.seek(skipBytes);
                     double all=jindutiao.getAll();
                     jumpedMillan=(long) (all*rate);
                 }else if ((type.equalsIgnoreCase("wave")) && (audioInfo.containsKey("audio.length.bytes"))) {
-                    long skipBytes = Math.round(((Integer) audioInfo.get("audio.length.bytes")).intValue() * rate);
+                    long skipBytes = Math.round(((Long) audioInfo.get("audio.length.bytes")).longValue() * rate);
                     player.seek(skipBytes);
                     double all=jindutiao.getAll();
                     jumpedMillan=(long) (all*rate);

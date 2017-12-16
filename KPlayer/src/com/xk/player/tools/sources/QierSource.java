@@ -332,7 +332,11 @@ public class QierSource implements IDownloadSource {
 			try {
 				Map<String, Object> map = JSONUtil.fromJson(content);
 				if(null != map) {
-					content = new String(new BASE64Decoder().decodeBuffer((String)map.get("lyric")), StandardCharsets.UTF_8);
+					String lrc = (String)map.get("lyric");
+					if(null == lrc) {
+						return null;
+					}
+					content = new String(new BASE64Decoder().decodeBuffer(lrc), StandardCharsets.UTF_8);
 					StringReader in = new StringReader(content);
 					return new LrcParser((long)Integer.MAX_VALUE).parserToXrc(in);
 				}

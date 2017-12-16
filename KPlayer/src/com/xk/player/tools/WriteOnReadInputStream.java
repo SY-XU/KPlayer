@@ -22,8 +22,8 @@ public abstract class WriteOnReadInputStream extends InputStream {
 	private MappedByteBuffer write;
 	private long buffered = 0;
 	private long bufferLimit = 40960l;
-	private long markPoint = 0;
-	private long markLimit = 0;
+	private long markPoint = -1;
+	private long markLimit = -1;
 	private long length;
 	private boolean closed = false;
 	private ReentrantLock lock;
@@ -102,7 +102,9 @@ public abstract class WriteOnReadInputStream extends InputStream {
 		if(pos <= 0|| pos > available()){
 			return 0;
 		}
+		System.out.println("skip " + pos + " bytes");
 		read.position(read.position() + (int)pos);
+		available -= pos;
 		return pos;
 	}
 
@@ -129,6 +131,10 @@ public abstract class WriteOnReadInputStream extends InputStream {
 
 	@Override
 	public synchronized void reset() throws IOException {
+		if(markPoint < 0) {
+			read.position(0);
+			return;
+		}
 		int readPosition = read.position();
 		if(readPosition - markPoint > markLimit || readPosition < markPoint) {
 			return;
@@ -163,6 +169,7 @@ public abstract class WriteOnReadInputStream extends InputStream {
 						}
 						write.put(buffer, 0, len);
 					}
+					System.out.println("download over!");
 					if(!closed) {
 						onDownloadEnd(target);
 					}
@@ -176,6 +183,14 @@ public abstract class WriteOnReadInputStream extends InputStream {
 						e1.printStackTrace();
 					}
 				} finally {
+					lock.lock();
+					try {
+						cond.signalAll();
+					} catch (Exception e) {
+						
+					}finally{
+						lock.unlock();
+					}
 					try {
 						source.close();
 					} catch (IOException e) {
