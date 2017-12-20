@@ -29,7 +29,7 @@ public class SongSearchItem extends LTableItem {
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
 		//右键菜单
-		if(e.button == 3) {
+		if(e.button == 3 && !head) {
 			Menu m=new Menu(getParent());
 			Menu menu=getParent().getMenu();
 			if (menu != null) {

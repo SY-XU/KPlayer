@@ -1104,6 +1104,10 @@ public class PlayUI implements BasicPlayerListener{
 		this.lrcOffset = lrcOffset;
 	}
 	
+	public void setBuffered(Double bufferSize) {
+		jindutiao.setSubProgress(bufferSize);
+	}
+	
 	/**
 	 * 打开音频同时需要进行一些变量初始化
 	 */
@@ -1114,6 +1118,7 @@ public class PlayUI implements BasicPlayerListener{
 		timeNow = 0;
 		audioInfo = properties;
 		final long all = "Monkey's Audio (ape)".equals(properties.get("audio.type")) ? (Long) properties.get("duration") : (Long) properties.get("duration") / 1000;
+		jindutiao.setSubProgress(-1d);
 		jindutiao.setAll( (all));
 		jindutiao.setPersent(0d,true);
 		Display.getDefault().asyncExec(new Runnable() {

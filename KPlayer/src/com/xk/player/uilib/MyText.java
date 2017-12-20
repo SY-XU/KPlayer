@@ -29,7 +29,7 @@ public class MyText extends StyledText implements PaintListener{
 	public void setNoTrim(){
 		Region region=new Region();
 		int borders=this.getBorderWidth()*2;
-		region.add(new Rectangle(borders/2, borders/2, this.getSize().x-borders*2, this.getSize().y-borders*2));
+		region.add(new Rectangle(borders/2, borders/2, this.getSize().x-borders, this.getSize().y-borders*2));
 		this.setRegion(region);
 	}
 	

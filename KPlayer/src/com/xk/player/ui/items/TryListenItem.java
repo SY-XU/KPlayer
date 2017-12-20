@@ -27,8 +27,10 @@ import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SourceFactory;
 import com.xk.player.tools.WriteOnReadInputStream;
 import com.xk.player.tools.sources.IDownloadSource.SearchInfo;
+import com.xk.player.ui.PlayUI;
 import com.xk.player.uilib.BaseBox;
 import com.xk.player.uilib.DelMusicComp;
+import com.xk.player.uilib.ICallback;
 
 public class TryListenItem extends SongItem {
 	
@@ -119,8 +121,16 @@ public class TryListenItem extends SongItem {
 			property.put("songitem", this);
 			property.put("duration", info.length);
 			property.put("audio.length.bytes", loc.length);
+			ICallback<Double> callBack = new ICallback<Double>() {
+
+				@Override
+				public Double callback(Double obj) {
+					PlayUI.getInstance().setBuffered(obj);
+					return obj;
+				}
+			};
 			try {
-				InputStream input = new WriteOnReadInputStream(loc.input, loc.length) {
+				InputStream input = new WriteOnReadInputStream(loc.input, loc.length, callBack) {
 
 					@Override
 					public void onDownloadEnd(File file) {

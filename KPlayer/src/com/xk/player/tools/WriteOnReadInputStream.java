@@ -12,6 +12,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.impl.AvalonLogger;
 
+import com.xk.player.uilib.ICallback;
+
 public abstract class WriteOnReadInputStream extends InputStream {
 
 	private static final String TEMP_DIR = "try_temp";
@@ -28,15 +30,17 @@ public abstract class WriteOnReadInputStream extends InputStream {
 	private boolean closed = false;
 	private ReentrantLock lock;
 	private Condition cond;
+	private ICallback<Double> proceCall;
 	
 	
-	public WriteOnReadInputStream(InputStream source, long length) throws IOException {
+	public WriteOnReadInputStream(InputStream source, long length, ICallback<Double> proceCall) throws IOException {
 		if(null == source) {
 			throw new NullPointerException("source is null");
 		}
 		this.source = source;
 		this.length = length;
 		this.available = length;
+		this.proceCall = proceCall;
 		lock = new ReentrantLock();
 		cond = lock.newCondition();
 		init(length);
@@ -157,6 +161,9 @@ public abstract class WriteOnReadInputStream extends InputStream {
 				try {
 					while(!closed && (len = source.read(buffer, 0, buffer.length))>= 0) {
 						buffered += len;
+						if(null != proceCall) {
+							proceCall.callback(buffered / (double) length);
+						}
 						if(buffered - read.position() > bufferLimit) {
 							lock.lock();
 							try {
