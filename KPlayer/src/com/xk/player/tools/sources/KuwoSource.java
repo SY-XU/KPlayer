@@ -285,4 +285,9 @@ public class KuwoSource implements IDownloadSource {
 		return HTTPUtil.getInstance("player").getInputStream(url);
 	}
 
+	@Override
+	public boolean tryListenSupport() {
+		return false;
+	}
+
 }

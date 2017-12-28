@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.http.Header;
 
 import com.xk.player.lrc.XRCLine;
+import com.xk.player.tools.Config;
 import com.xk.player.tools.SongLocation;
 
 public interface IDownloadSource {
@@ -27,7 +28,10 @@ public interface IDownloadSource {
 	
 	public List<XRCLine> parse(String content);
 	
+	public boolean tryListenSupport();
+	
 	public static class SearchInfo{
+		private String source = Config.getInstance().downloadSource;
 		boolean urlFound = false;
 		String url = "";
 		String lrcUrl = "";
@@ -58,6 +62,10 @@ public interface IDownloadSource {
 		
 		public String getLrcUrl() {
 			return lrcUrl;
+		}
+		
+		public String getSource() {
+			return source;
 		}
 	}
 	

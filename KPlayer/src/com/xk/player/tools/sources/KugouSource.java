@@ -229,4 +229,9 @@ public class KugouSource implements IDownloadSource {
 		return null;
 	}
 
+	@Override
+	public boolean tryListenSupport() {
+		return false;
+	}
+
 }

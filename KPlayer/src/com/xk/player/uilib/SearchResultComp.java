@@ -115,9 +115,9 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 				
 				@Override
 				public void run() {
-					String url=info.getUrl();
-					String html=HTTPUtil.getInstance("player").getHtml(url, info.headers);
-					persent=30;
+					String url = info.getUrl();
+					String html = HTTPUtil.getInstance("player").getHtml(url, info.headers);
+					persent = 30;
 					flush();
 					try {
 						Thread.sleep(500);
@@ -125,8 +125,8 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					List<XRCLine> lrcs = SourceFactory.getSource(Config.getInstance().downloadSource).parse(html);
-					persent=60;
+					List<XRCLine> lrcs = SourceFactory.getSource(info.getSource()).parse(html);
+					persent = 60;
 					flush();
 					try {
 						Thread.sleep(300);
@@ -145,7 +145,7 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 						file.createNewFile();
 					} catch (IOException e) {
 					}
-					persent=80;
+					persent = 80;
 					flush();
 					try {
 						Thread.sleep(300);
@@ -154,7 +154,7 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 						e1.printStackTrace();
 					}
 					FileUtils.writeString(sb, file);
-					persent=100;
+					persent = 100;
 					flush();
 					try {
 						Thread.sleep(300);
@@ -162,7 +162,7 @@ public class SearchResultComp extends Composite implements ICallable<String>{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					downloading=false;
+					downloading = false;
 					flush();
 				}
 			}).start();

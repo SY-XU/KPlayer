@@ -29,7 +29,7 @@ public class SongSearchItem extends LTableItem {
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
 		//右键菜单
-		if(e.button == 3 && !head) {
+		if(e.button == 3 && !head && SourceFactory.getSource(info.getSource()).tryListenSupport()) {
 			Menu m=new Menu(getParent());
 			Menu menu=getParent().getMenu();
 			if (menu != null) {
@@ -66,9 +66,9 @@ public class SongSearchItem extends LTableItem {
 			public void run() {
 				Config conf = Config.getInstance();
 				String url = info.getUrl();
-				SongLocation loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+				SongLocation loc = SourceFactory.getSource(info.getSource()).getInputStream(url);
 				if(null == loc) {
-					loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+					loc = SourceFactory.getSource(info.getSource()).getInputStream(url);
 				}
 				if(null == loc) {
 					downloading=false;

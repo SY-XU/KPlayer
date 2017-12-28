@@ -236,9 +236,9 @@ public class Jindutiao extends Composite {
 			Color back = gc.getForeground();
 			Color color = new Color(null, 255, 255, 255);
 			gc.setForeground(color);
-			Rectangle rect = new Rectangle(height / 2, height / 2, width - height, 3);
-			gc.drawRectangle(rect);
 			if(Jindutiao.this.subProgress > 0) {
+				Rectangle rect = new Rectangle(height / 2, height / 2, width - height, 3);
+				gc.drawRectangle(rect);
 				int alpha = gc.getAlpha();
 				int progress = (int) ((width - height) * Jindutiao.this.subProgress);
 				if(progress - pointX > 0) {
@@ -247,6 +247,8 @@ public class Jindutiao extends Composite {
 					gc.setForeground(color);
 					gc.setAlpha(alpha);
 				}
+			} else {
+				gc.drawLine(height/2, height/2+1, width-height/2, height/2+1);
 			}
 			gc.setLineWidth(3);
 			gc.drawLine(height / 2, height / 2 + 1, pointX + height / 2, height / 2 + 1);

@@ -107,10 +107,10 @@ public class TryListenItem extends SongItem {
 		if(null == realFile) {
 			String url = info.getUrl();
 			System.out.println("try load input stream ");
-			SongLocation loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+			SongLocation loc = SourceFactory.getSource(info.getSource()).getInputStream(url);
 			if(null == loc) {
 				System.out.println("retry load input stream!");
-				loc = SourceFactory.getSource(Config.getInstance().downloadSource).getInputStream(url);
+				loc = SourceFactory.getSource(info.getSource()).getInputStream(url);
 			}
 			if(null == loc || loc.length == 0) {
 				System.out.println("input stream load failed!");
@@ -158,7 +158,7 @@ public class TryListenItem extends SongItem {
 		if(null == lrcs) {
 			String lrcurl = info.getLrcUrl();
 			String html = HTTPUtil.getInstance("player").getHtml(lrcurl, info.headers);
-			lrcs = SourceFactory.getSource(Config.getInstance().downloadSource).parse(html);
+			lrcs = SourceFactory.getSource(info.getSource()).parse(html);
 		}
 		return lrcs;
 	}

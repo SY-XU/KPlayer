@@ -348,4 +348,9 @@ public class QierSource implements IDownloadSource {
 		return null;
 	}
 
+	@Override
+	public boolean tryListenSupport() {
+		return true;
+	}
+
 }

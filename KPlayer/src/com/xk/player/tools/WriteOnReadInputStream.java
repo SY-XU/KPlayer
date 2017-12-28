@@ -14,6 +14,11 @@ import org.apache.commons.logging.impl.AvalonLogger;
 
 import com.xk.player.uilib.ICallback;
 
+/**
+ * 读写同时进行，缓存流
+ * @author kui.xiao
+ *
+ */
 public abstract class WriteOnReadInputStream extends InputStream {
 
 	private static final String TEMP_DIR = "try_temp";
@@ -129,21 +134,28 @@ public abstract class WriteOnReadInputStream extends InputStream {
 
 	@Override
 	public synchronized void mark(int readlimit) {
+		
 		this.markPoint = read.position();
 		this.markLimit = readlimit;
+		System.out.println("mark : " + readlimit + ", markPoint : " + markPoint);
 	}
 
 	@Override
 	public synchronized void reset() throws IOException {
+		System.out.println("reset markPoint : " + markPoint + "");
 		if(markPoint < 0) {
+			available = length;
 			read.position(0);
 			return;
 		}
 		int readPosition = read.position();
 		if(readPosition - markPoint > markLimit || readPosition < markPoint) {
+			System.out.println("ignore reset....");
 			return;
 		}
+		available = length - markPoint;
 		read.position((int) markPoint);
+		
 	}
 
 	@Override
@@ -151,6 +163,11 @@ public abstract class WriteOnReadInputStream extends InputStream {
 		return true;
 	}
 
+	/**
+	 * 缓存数据
+	 * @param target
+	 * @author kui.xiao
+	 */
 	private void bufferData(File target) {
 		new Thread(new Runnable() {
 			
@@ -161,9 +178,11 @@ public abstract class WriteOnReadInputStream extends InputStream {
 				try {
 					while(!closed && (len = source.read(buffer, 0, buffer.length))>= 0) {
 						buffered += len;
+						//进度回调
 						if(null != proceCall) {
 							proceCall.callback(buffered / (double) length);
 						}
+						//缓存够了要通知
 						if(buffered - read.position() > bufferLimit) {
 							lock.lock();
 							try {
@@ -190,6 +209,7 @@ public abstract class WriteOnReadInputStream extends InputStream {
 						e1.printStackTrace();
 					}
 				} finally {
+					//缓存过程完毕要通知，不管是正常还是异常完毕
 					lock.lock();
 					try {
 						cond.signalAll();

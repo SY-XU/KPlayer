@@ -519,4 +519,9 @@ public class NetEasySource implements IDownloadSource {
 		return HTTPUtil.getInstance("player").getInputStream(url);
 	}
 
+	@Override
+	public boolean tryListenSupport() {
+		return true;
+	}
+
 }
