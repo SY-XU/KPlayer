@@ -997,11 +997,25 @@ public class PlayUI implements BasicPlayerListener{
 	 */
 	public void playNext(){
 		if(currentPlay != types.getSelectIndex()){
-			types.select(currentPlay, true);
+			Display.getDefault().asyncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					types.select(currentPlay, true);
+				}
+			});
+			
+		}
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		System.out.println("playnext : currentPlay = " + currentPlay);
 		MyList current = list.get(types.getItems().get(currentPlay));
 		if(current.getItemCount() == 0) {
+			System.out.println("no item found");
 			return;
 		}
 		int now=current.getSelectIndex();
