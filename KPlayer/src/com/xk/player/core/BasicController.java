@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
+import com.xk.player.tools.WriteOnReadInputStream;
+
 /**
  * This interface defines player controls available.  
  */
@@ -38,7 +40,7 @@ public interface BasicController {
      * @param in
      * @throws BasicPlayerException
      */
-    public void open(InputStream in, Map<String, Object> properties) throws BasicPlayerException;
+    public void open(WriteOnReadInputStream in, Map<String, Object> properties) throws BasicPlayerException;
 
     /**
      * Open file to play.

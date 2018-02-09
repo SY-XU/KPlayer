@@ -14,6 +14,26 @@ import com.xk.player.lrc.XRCNode;
 
 public class LRCFactory {
 
+	public static List<XRCLine> fromTargetFile(String path, long allLength) {
+		if(path.endsWith(".zlrc")) {
+			String data = FileUtils.readString(path);
+			return JSONUtil.toBean(data, JSONUtil.getCollectionType(List.class, XRCLine.class));
+		} else if(path.endsWith(".krc")) {
+			return KrcText.fromKRC(path);
+		} else if(path.endsWith(".trc")) {
+			return fromTRC(new File(path));
+		} else if(path.endsWith(".lrc")) {
+			try {
+				LrcParser parser = new LrcParser(allLength);
+				return parser.parser(path);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	
 	public static List<XRCLine> fromFile(String musicName, long allLength) {
 		Config config = Config.getInstance();
 		File songWord = new File(config.lrcPath, musicName + ".lrc");

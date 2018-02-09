@@ -25,8 +25,6 @@ package com.xk.player.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +53,7 @@ import javazoom.spi.PropertiesContainer;
 import org.tritonus.share.sampled.TAudioFormat;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 
-import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.WriteOnReadInputStream;
 
 import static com.xk.player.core.BasicPlayerEvent.*;
 
@@ -279,7 +277,7 @@ public class BasicPlayer implements BasicController, Runnable {
     /**
      * Open inputstream to play.
      */
-    public void open(InputStream inputStream, Map<String, Object> properties) throws BasicPlayerException {
+    public void open(WriteOnReadInputStream inputStream, Map<String, Object> properties) throws BasicPlayerException {
         log.info("open(" + inputStream + ")");
         if (inputStream != null) {
         	if(null != properties) {
@@ -304,8 +302,8 @@ public class BasicPlayer implements BasicController, Runnable {
                 initAudioInputStream((URL) m_dataSource);
             } else if (m_dataSource instanceof File) {
                 initAudioInputStream((File) m_dataSource);
-            } else if (m_dataSource instanceof InputStream) {
-                initAudioInputStream((InputStream) m_dataSource);
+            } else if (m_dataSource instanceof WriteOnReadInputStream) {
+                initAudioInputStream((WriteOnReadInputStream) m_dataSource);
             }
             System.out.println("init stream over ....");
             createLine();
@@ -385,7 +383,7 @@ public class BasicPlayer implements BasicController, Runnable {
     /**
      * Inits Audio ressources from InputStream.
      */
-    protected void initAudioInputStream(InputStream inputStream) throws UnsupportedAudioFileException, IOException {
+    protected void initAudioInputStream(WriteOnReadInputStream inputStream) throws UnsupportedAudioFileException, IOException {
         m_audioInputStream = AudioSystem.getAudioInputStream(inputStream);
         m_audioFileFormat = AudioSystem.getAudioFileFormat(inputStream);
     }

@@ -14,14 +14,17 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.jsoup.helper.StringUtil;
 
 import com.xk.player.core.BasicPlayer;
 import com.xk.player.core.BasicPlayerException;
 import com.xk.player.lrc.XRCLine;
 import com.xk.player.tools.Config;
 import com.xk.player.tools.HTTPUtil;
+import com.xk.player.tools.LRCFactory;
 import com.xk.player.tools.SWTTools;
 import com.xk.player.tools.SongLocation;
 import com.xk.player.tools.SourceFactory;
@@ -64,6 +67,23 @@ public class TryListenItem extends SongItem {
 					getParent().select(TryListenItem.this,false);
 				}
 				
+			});
+			
+			MenuItem linkLrc = new MenuItem(m, SWT.NONE);
+			linkLrc.setText("关联歌词");
+			linkLrc.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					FileDialog dialog = new FileDialog(getParent().getShell());
+					dialog.setText("选择歌词文件");
+					dialog.setFilterExtensions(new String[]{"*.zlrc;*.krc;*.lrc;*.trc"});
+					dialog.setFilterNames(new String[]{"歌词文件"});
+					String path = dialog.open();
+					if(!StringUtil.isBlank(path)) {
+						lrcs = LRCFactory.fromTargetFile(path, info.length);
+					}
+				}
 			});
 			
 			
@@ -130,7 +150,7 @@ public class TryListenItem extends SongItem {
 				}
 			};
 			try {
-				InputStream input = new WriteOnReadInputStream(loc.input, loc.length, callBack) {
+				WriteOnReadInputStream input = new WriteOnReadInputStream(loc.input, loc.length, callBack) {
 
 					@Override
 					public void onDownloadEnd(File file) {

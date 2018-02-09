@@ -31,6 +31,7 @@ import com.xk.player.lrc.XRCLine;
 import com.xk.player.tools.FileUtils;
 
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.jsoup.helper.StringUtil;
 
 import com.xk.player.tools.Config;
 import com.xk.player.tools.LRCFactory;
@@ -78,9 +79,13 @@ public class SongItem extends ListItem {
 
 	@Override
 	public void draw(GC gc, int start,int width,int index) {
+		String pathPro = property.get("path");
+		if(StringUtil.isBlank(pathPro)) {
+			return;
+		}
 		String name=FileUtils.getLimitString(property.get("name"), 14);
 		Font font=SWTResourceManager.getFont("黑体", 10, SWT.NORMAL);
-		boolean hq = property.get("path").endsWith(".ape");
+		boolean hq = pathPro.endsWith(".ape");
 		if(selected){
 			int alf=gc.getAlpha();
 			gc.setAlpha(55);

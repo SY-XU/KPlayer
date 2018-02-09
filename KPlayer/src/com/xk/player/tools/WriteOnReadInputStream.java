@@ -108,8 +108,9 @@ public abstract class WriteOnReadInputStream extends InputStream {
 
 	@Override
 	public long skip(long pos) throws IOException {
-		if(pos <= 0|| pos > available()){
-			return 0;
+		int loc = read.position();
+		if(pos - loc < 0|| pos + loc > available()){
+			return -1;
 		}
 		System.out.println("skip " + pos + " bytes");
 		read.position(read.position() + (int)pos);
@@ -237,6 +238,16 @@ public abstract class WriteOnReadInputStream extends InputStream {
 			return buffer[0];
 		}
 		return -1;
+	}
+	
+	public void reStart() throws IOException {
+		if(closed) {
+			throw new IOException("closed stream");
+		}
+		this.available = length;
+		this.markPoint = -1;
+		this.markLimit = -1;
+		read.position(0);
 	}
 
 	public abstract void onDownloadEnd(File file);
